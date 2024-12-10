@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const CaptainLogin = () => {
   return (
-    <>
+    <div className="max-w-96 mx-auto">
       <div className="p-7 h-screen flex flex-col justify-between">
         <div>
           <img
@@ -54,7 +54,7 @@ const CaptainLogin = () => {
           </Link>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
