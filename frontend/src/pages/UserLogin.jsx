@@ -1,7 +1,39 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { UserDataContext } from "../context/UserContext";
 
 const UserLogin = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
+  const { user, setUser } = useContext(UserDataContext);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/login`,
+        { email, password }
+      );
+      if (response.status === 200) {
+        // Successful login
+        const { user, token } = response.data;
+        localStorage.setItem("token", token);
+        navigate("/home");
+        setUser(user);
+        console.log(user);
+        console.log(token);
+      } else {
+        console.error("Error:", data.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   return (
     <div className="max-w-96 mx-auto">
       <div className="p-7 h-screen flex flex-col justify-between">
@@ -12,12 +44,12 @@ const UserLogin = () => {
             alt=""
           />
 
-          <form>
+          <form onSubmit={submitHandler}>
             <h3 className="text-lg font-medium mb-2">What's your email</h3>
             <input
               required
-              value=""
-              onChange=""
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="bg-[#eeeeee] mb-7 rounded-lg px-4 py-2 border w-full text-lg placeholder:text-base"
               type="email"
               placeholder="email@example.com"
@@ -27,8 +59,10 @@ const UserLogin = () => {
 
             <input
               className="bg-[#eeeeee] mb-7 rounded-lg px-4 py-2 border w-full text-lg placeholder:text-base"
-              value=""
-              onChange={() => {}}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
               required
               type="password"
               placeholder="password"
