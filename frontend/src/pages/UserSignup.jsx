@@ -48,7 +48,7 @@ const UserSignup = () => {
 
   return (
     <>
-      <div>
+      <div className="max-w-96 mx-auto">
         <div className="p-7 h-screen flex flex-col justify-between">
           <div>
             <img
