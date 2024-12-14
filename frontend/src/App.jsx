@@ -9,6 +9,7 @@ import CaptainSignup from "./pages/CaptainSignup";
 import UserProtectWrapper from "./pages/UserProtectWrapper";
 import UserLogout from "./pages/UserLogout";
 import CaptainLogout from "./pages/CaptainLogout";
+import CaptainHome from "./pages/CaptainHome";
 
 const App = () => {
   return (
