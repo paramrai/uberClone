@@ -22,3 +22,27 @@ module.exports.getAdrressCoordinates = async (address) => {
     throw error;
   }
 };
+
+module.exports.getDistanceTime = async (origin, destination) => {
+  // call google map api to get distance and time
+  // return distance and time
+  const apiKey = process.env.GOOGLE_MAPS_API;
+  const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(
+    origin
+  )}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
+
+  try {
+    const response = await axios.get(url);
+    if (response.data.status === "OK") {
+      if (response.data.rows[0].elements[0].status === "ZERO_RESULTS") {
+        throw new Error("No route found between the given addresses.");
+      }
+
+      return response.data.rows[0].elements[0];
+    } else {
+      throw new Error("Failed to fetch distance and time.");
+    }
+  } catch (error) {
+    throw error;
+  }
+};
