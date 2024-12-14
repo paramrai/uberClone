@@ -46,3 +46,29 @@ module.exports.getDistanceTime = async (origin, destination) => {
     throw error;
   }
 };
+
+module.exports.getAutoCompleteSuggestions = async function (input) {
+  // call google map api to get auto complete suggestions
+  // return auto complete suggestions
+  const apiKey = process.env.GOOGLE_MAPS_API;
+  const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+    input
+  )}&types=(cities)&key=${apiKey}`;
+
+  if (!input) {
+    throw new Error("Input cannot be empty. It is required");
+  }
+
+  try {
+    const response = await axios.get(url);
+    if (response.data.status === "OK") {
+      return response.data.predictions.map(
+        (prediction) => prediction.description
+      );
+    } else {
+      throw new Error("Failed to fetch auto complete suggestions.");
+    }
+  } catch (error) {
+    throw error;
+  }
+};
