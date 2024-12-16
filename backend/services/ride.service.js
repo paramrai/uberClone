@@ -73,3 +73,4 @@ const getOtp = (num) => {
 };
 
 module.exports = createRide;
+module.exports = getFare;
