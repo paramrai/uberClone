@@ -132,24 +132,25 @@ const Home = () => {
 
       {/* find a trip from input  */}
       <div className=" flex flex-col justify-end h-screen absolute top-0 w-full">
-        <div className="h-[30%] p-6 bg-white relative">
+        <div className="h-[30%] p-3 bg-white relative">
           <h5
             ref={panelCloseRef}
             onClick={() => {
               setPanelOpen(false);
             }}
-            className="absolute opacity-0 right-6 top-6 text-2xl"
+            className="absolute opacity-0 right-6 top-4 text-2xl cursor-pointer"
           >
             <i className="ri-arrow-down-wide-line"></i>
           </h5>
 
           <h4 className="text-2xl font-semibold">Find a trip</h4>
           <form
+            className="relative py-2"
             onSubmit={(e) => {
               submitHandler(e);
             }}
           >
-            <div className="line absolute h-16 w-1 top-[45%] left-10 bg-gray-700 rounded-full"></div>
+            <div className="line absolute h-16 w-1 top-[35%] left-5 bg-gray-700 rounded-full"></div>
             <input
               onClick={() => {
                 setPanelOpen(true);

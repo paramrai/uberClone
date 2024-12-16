@@ -11,7 +11,7 @@ const CaptainProtectWrappper = ({ children }) => {
 
   useEffect(() => {
     if (!token) {
-      navigate("/login");
+      navigate("/captain-login");
     }
 
     axios
@@ -20,14 +20,14 @@ const CaptainProtectWrappper = ({ children }) => {
       })
       .then((response) => {
         if (response.status === 200) {
-          setUser(response.data.user);
+          setCaptain(response.data.captain);
         }
         setIsLoading(false);
       })
       .catch((error) => {
         console.error(error);
         localStorage.removeItem("token");
-        navigate("/login");
+        navigate("/captain-login");
         setIsLoading(false);
       });
 
