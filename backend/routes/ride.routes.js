@@ -16,7 +16,7 @@ router.post(
     .isLength({ min: 3 })
     .withMessage("Valid destination address is required"),
   body("vehicleType")
-    .isIn(["car", "bike", "moto"])
+    .isIn(["car", "auto", "moto"])
     .withMessage("Valid vehicle type is required"),
   createRide
 );
