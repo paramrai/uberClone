@@ -25,6 +25,7 @@ const Home = () => {
   const [activeField, setActiveField] = useState("");
   const [vehicleType, setVehicleType] = useState(null);
   const [fare, setFare] = useState("");
+  const [ride, setRide] = useState(null);
 
   // refs
   const panelRef = useRef(null);
@@ -47,6 +48,12 @@ const Home = () => {
       console.log({ user });
     }
   }, [user]);
+
+  socket.emit("ride-confirmed", (ride) => {
+    setVehicleFound(false);
+    setWaitingForDriver(true);
+    setRide(ride);
+  });
 
   useGSAP(
     function () {
@@ -365,7 +372,12 @@ const Home = () => {
         ref={waitingForDriverRef}
         className="fixed w-96 mx-auto z-10 bottom-0 px-3 py-6 bg-white"
       >
-        <WaitingForDriver waitingForDriver={waitingForDriver} />
+        <WaitingForDriver
+          ride={ride}
+          setVehicleFound={setVehicleFound}
+          setWaitingForDriver={setWaitingForDriver}
+          waitingForDriver={waitingForDriver}
+        />
       </div>
     </div>
   );

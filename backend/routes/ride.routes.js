@@ -1,6 +1,10 @@
 const express = require("express");
 const { authUser } = require("../middlewares/auth.middleware");
-const { createRide, getFare } = require("../controllers/ride.controller");
+const {
+  createRide,
+  getFare,
+  confirmRide,
+} = require("../controllers/ride.controller");
 const { body, query } = require("express-validator");
 const router = express.Router();
 
@@ -33,6 +37,13 @@ router.get(
     .isLength({ min: 3 })
     .withMessage("Valid destination address is required"),
   getFare
+);
+
+router.post(
+  "/confirm",
+  authUser,
+  body("rideId").isMongoId().withMessage("invalid ride id"),
+  confirmRide
 );
 
 module.exports = router;
