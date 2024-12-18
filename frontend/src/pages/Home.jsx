@@ -8,6 +8,7 @@ import WaitingForDriver from "../components/WaitingForDriver";
 import LookingForDriver from "../components/LookingForDriver";
 import axios from "axios";
 import { UserDataContext } from "../context/UserContext";
+import { SocketContext } from "../context/SocketContext";
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -38,6 +39,14 @@ const Home = () => {
   };
 
   const { user } = useContext(UserDataContext);
+  const { socket } = useContext(SocketContext);
+
+  useEffect(() => {
+    if (user) {
+      socket.emit("join", { userType: "user", userId: user._id });
+      console.log({ user });
+    }
+  }, [user]);
 
   useGSAP(
     function () {

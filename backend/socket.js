@@ -18,6 +18,8 @@ function initializeSocket(server) {
     socket.on("join", async (data) => {
       const { userId, userType } = data;
 
+      console.log(`User ${userId} joined as ${userType}`);
+
       if (userType === "user") {
         await userModel.findByIdAndUpdate(userId, { socketId: socket.id });
       } else if (userType === "captain") {
@@ -30,12 +32,23 @@ function initializeSocket(server) {
     socket.on("disconnect", () => {
       console.log(`Client disconnected: ${socket.id}`);
     });
+
+    socket.on("update-captain-location", async (data) => {
+      const { userId, location } = data;
+      if (!userId || !location.ltd || !location.lng) {
+        return socket.emit("error", { message: "Invalid location data" });
+      }
+
+      await captainModel.findByIdAndUpdate(userId, {
+        location: { lng: location.lng, ltd: location.ltd },
+      });
+    });
   });
 }
 
-function sendMessageToSocketId(socketId, message) {
+function sendMessageToSocketId(socketId, messageObject) {
   if (io) {
-    io.to(socketId).emit("message", message);
+    io.to(socketId).emit(messageObject.event, messageObject.data);
   } else {
     console.log("Socket io not initialized");
   }
