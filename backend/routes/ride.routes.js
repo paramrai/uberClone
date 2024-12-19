@@ -5,6 +5,7 @@ const {
   getFare,
   confirmRide,
   startRide,
+  endRide,
 } = require("../controllers/ride.controller");
 const { body, query } = require("express-validator");
 const router = express.Router();
@@ -56,6 +57,13 @@ router.get(
     .isLength({ min: 6, max: 6 })
     .withMessage("Invalid otp id"),
   startRide
+);
+
+router.post(
+  "/end-ride",
+  authCaptain,
+  query("rideId").isMongoId().withMessage("Invalid ride id"),
+  endRide
 );
 
 module.exports = router;
