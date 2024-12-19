@@ -121,6 +121,7 @@ const CaptainHome = () => {
           className="fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white max-w-96"
         >
           <ConfirmRidePopUp
+            ride={ride}
             setConfirmRidePopupPanel={setConfirmRidePopupPanel}
             setRidePopupPanel={setRidePopupPanel}
           />

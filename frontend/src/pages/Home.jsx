@@ -9,6 +9,7 @@ import LookingForDriver from "../components/LookingForDriver";
 import axios from "axios";
 import { UserDataContext } from "../context/UserContext";
 import { SocketContext } from "../context/SocketContext";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -41,6 +42,7 @@ const Home = () => {
 
   const { user } = useContext(UserDataContext);
   const { socket } = useContext(SocketContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -53,6 +55,11 @@ const Home = () => {
     setVehicleFound(false);
     setWaitingForDriver(true);
     setRide(ride);
+  });
+
+  socket.emit("ride-started", (ride) => {
+    setWaitingForDriver(false);
+    navigate("/riding");
   });
 
   useGSAP(

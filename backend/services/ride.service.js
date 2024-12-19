@@ -108,3 +108,30 @@ module.exports.confirmRide = async (rideId, captain) => {
 
   return ride;
 };
+
+module.exports.startRide = async ({ rideId, otp, cap }) => {
+  if (!rideId || !otp) throw new Error("Ride Id and otp is required");
+
+  const ride = await rideModel.findOne({
+    _id: rideId,
+    otp,
+  });
+
+  if (!ride) throw new Error("No such ride found");
+
+  if (ride.status !== "accepted") throw new Error("Ride is not accepted");
+
+  if (ride.otp !== otp) throw new Error("otp is not valid");
+
+  await rideModel.findByIdAndUpdate(
+    {
+      _id: rideId,
+    },
+    {
+      status: "ongoing",
+      captain: cap._id,
+    }
+  );
+
+  return ride;
+};

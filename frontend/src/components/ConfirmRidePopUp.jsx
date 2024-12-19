@@ -1,11 +1,33 @@
+import axios from "axios";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const ConfirmRidePopUp = (props) => {
   const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
 
-  const submitHander = (e) => {
+  const submitHander = async (e) => {
     e.preventDefault();
+
+    // start the ride
+    const response = axios.get(
+      `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
+      {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        params: {
+          rideId: props.ride._id,
+          otp,
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      props.setConfirmRidePopupPanel(false);
+      props.setRidePopupPanel(false);
+      navigate("/captain-riding", { state: { ride: response.data } });
+    }
   };
 
   return (
@@ -26,7 +48,7 @@ const ConfirmRidePopUp = (props) => {
             src="https://i.pinimg.com/236x/af/26/28/af26280b0ca305be47df0b799ed1b12b.jpg"
             alt=""
           />
-          <h2 className="text-lg font-medium">Harshi Pateliya</h2>
+          <h2 className="text-lg font-medium">{}</h2>
         </div>
         <h5 className="text-lg font-semibold">2.2 KM</h5>
       </div>
