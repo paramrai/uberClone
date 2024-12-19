@@ -8,6 +8,7 @@ import gsap from "gsap";
 import { SocketContext } from "../context/SocketContext";
 import axios from "axios";
 import { CaptainDataContext } from "../context/CaptainContext";
+import LiveTracking from "../components/LiveTracking";
 
 const CaptainHome = () => {
   const [ridePopupPanel, setRidePopupPanel] = useState(false);
@@ -90,15 +91,11 @@ const CaptainHome = () => {
           </Link>
         </div>
         <div className="h-3/5">
-          <img
-            className="h-full w-full object-cover"
-            src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
-            alt=""
-          />
+          <LiveTracking />
         </div>
 
         {/* ========= captain details ======== */}
-        <div className="h-2/5 p-6">
+        <div className="h-2/5 p-6 z-[11]">
           <CaptainDetails />
         </div>
 
