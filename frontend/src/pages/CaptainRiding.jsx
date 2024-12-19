@@ -1,28 +1,13 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import React, { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import FinishRide from "../components/FinishRide";
 
 const CaptainRiding = () => {
   const [finishRidePanel, setFinishRidePanel] = useState(false);
   const finishRidePanelRef = useRef(null);
 
-  // finishRidePanelRefOutsideClick
-  // useEffect(() => {
-  //   const handleOutsideClick = (e) => {
-  //     if (!finishRidePanelRef.current.contains(e.target)) {
-  //       setFinishRidePanel(false);
-  //     }
-  //   };
-
-  //   document.addEventListener("mousedown", handleOutsideClick);
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleOutsideClick);
-  //   };
-  // }, [finishRidePanelRef]);
-
-  const location = useLocation();
   const rideData = location.state?.ride;
 
   useGSAP(
