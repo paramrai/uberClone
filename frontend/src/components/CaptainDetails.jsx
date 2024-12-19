@@ -15,7 +15,7 @@ const CaptainDetails = () => {
           />
           <h4 className="text-lg font-medium">
             {captain?.fullname.firstname
-              ? captain?.fullname.firstname + captain?.fullname.lastname
+              ? captain?.fullname.firstname + " " + captain?.fullname.lastname
               : "Harsh Patel"}
           </h4>
         </div>

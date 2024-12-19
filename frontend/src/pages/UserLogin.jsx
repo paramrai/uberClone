@@ -1,14 +1,21 @@
 import axios from "axios";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserDataContext } from "../context/UserContext";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const navigate = useNavigate();
   const { user, setUser } = useContext(UserDataContext);
+  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (error) {
+      // false the error after 7 seconds
+      setTimeout(() => setError(null), 10000);
+    }
+  });
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -30,7 +37,12 @@ const UserLogin = () => {
         console.error("Error:", data.message);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.log(error);
+      if (error.status === 401) {
+        setError("Invalid email or password");
+      }
+
+      setError(error.response.data.errors[0].msg);
     }
   };
 
@@ -67,7 +79,11 @@ const UserLogin = () => {
               type="password"
               placeholder="password"
             />
-
+            {error && (
+              <span className="text-red-500 bg-white inline-block w-full text-left py-1">
+                {error}
+              </span>
+            )}
             <button className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base">
               Login
             </button>

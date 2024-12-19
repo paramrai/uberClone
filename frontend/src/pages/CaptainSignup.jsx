@@ -1,10 +1,11 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CaptainDataContext } from "../context/CaptainContext";
 
 const CaptainSignup = () => {
+  const { captain, setCaptain } = useContext(CaptainDataContext);
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -16,8 +17,14 @@ const CaptainSignup = () => {
   const [vehiclePlate, setVehiclePlate] = useState("");
   const [vehicleCapacity, setVehicleCapacity] = useState("");
   const [vehicleType, setVehicleType] = useState("");
+  const [error, setError] = useState(null);
 
-  const { captain, setCaptain } = useContext(CaptainDataContext);
+  useEffect(() => {
+    // Clear error after 10 seconds
+    setTimeout(() => {
+      setError(null);
+    }, 10000);
+  }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -36,26 +43,22 @@ const CaptainSignup = () => {
       },
     };
 
-    const response = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/captains/register`,
-      captainData
-    );
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/captains/register`,
+        captainData
+      );
 
-    if (response.status === 201) {
-      const data = response.data;
-      setCaptain(data.captain);
-      localStorage.setItem("token", data.token);
-      navigate("/captain-home");
+      if (response.status === 201) {
+        const data = response.data;
+        setCaptain(data.captain);
+        localStorage.setItem("token", data.token);
+        navigate("/captain-home");
+      }
+    } catch (error) {
+      // update the error message
+      setError(error.response.data.errors[0].msg);
     }
-
-    setEmail("");
-    setFirstName("");
-    setLastName("");
-    setPassword("");
-    setVehicleColor("");
-    setVehiclePlate("");
-    setVehicleCapacity("");
-    setVehicleType("");
   };
   return (
     <div className="max-w-96 mx-auto">
@@ -175,7 +178,11 @@ const CaptainSignup = () => {
                 <option value="moto">Moto</option>
               </select>
             </div>
-
+            {error && (
+              <span className="text-red-500 bg-white inline-block w-full text-left py-1">
+                {error}
+              </span>
+            )}
             <button className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base">
               Create Captain Account
             </button>

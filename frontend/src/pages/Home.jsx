@@ -27,6 +27,7 @@ const Home = () => {
   const [vehicleType, setVehicleType] = useState(null);
   const [fare, setFare] = useState("");
   const [ride, setRide] = useState(null);
+  const [error, setError] = useState(null);
 
   // refs
   const panelRef = useRef(null);
@@ -47,9 +48,15 @@ const Home = () => {
   useEffect(() => {
     if (user) {
       socket.emit("join", { userType: "user", userId: user._id });
-      console.log({ user });
     }
   }, [user]);
+
+  useEffect(() => {
+    if (error) {
+      // false the error after 7 seconds
+      setTimeout(() => setError(null), 7000);
+    }
+  });
 
   socket.emit("ride-confirmed", (ride) => {
     setVehicleFound(false);
@@ -110,9 +117,15 @@ const Home = () => {
         gsap.to(confirmRidePanelRef.current, {
           transform: "translateY(0)",
         });
+        gsap.to(waitingForDriverRef, {
+          opacity: 0,
+        });
       } else {
         gsap.to(confirmRidePanelRef.current, {
           transform: "translateY(100%)",
+        });
+        gsap.to(waitingForDriverRef, {
+          opacity: 1,
         });
       }
     },
@@ -125,9 +138,15 @@ const Home = () => {
         gsap.to(vehicleFoundRef.current, {
           transform: "translateY(0)",
         });
+        gsap.to(confirmRidePanelRef.current, {
+          opacity: 0,
+        });
       } else {
         gsap.to(vehicleFoundRef.current, {
           transform: "translateY(100%)",
+        });
+        gsap.to(confirmRidePanelRef.current, {
+          opacity: 1,
         });
       }
     },
@@ -151,6 +170,10 @@ const Home = () => {
 
   const handlePickupChange = async (e) => {
     setPickup(e.target.value);
+    if (e.target.value.length < 3) {
+      setError("Please enter a valid pickup or destination");
+      return;
+    }
     const token = localStorage.getItem("token");
     // fetch suggestions
     try {
@@ -169,11 +192,20 @@ const Home = () => {
       response.status === 200 && setPickupSuggestions(response.data);
     } catch (error) {
       console.error(error);
+      setError(
+        error.response.data.message ||
+          error.response.data.error ||
+          error.message
+      );
     }
   };
 
   const handleDestinationChange = async (e) => {
     setDestination(e.target.value);
+    if (e.target.value.length < 3) {
+      setError("Please enter a valid pickup or destination");
+      return;
+    }
     const token = localStorage.getItem("token");
     // fetch suggestions
     try {
@@ -189,14 +221,26 @@ const Home = () => {
         }
       );
       response.status === 200 && setDestinationSuggestions(response.data);
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      console.error(error);
+      setError(
+        error.response.data.message ||
+          error.response.data.error ||
+          error.message
+      );
     }
   };
 
   const findTrip = async () => {
-    setVehiclePanel(true);
-    setPanelOpen(false);
+    if (!pickup || !destination) {
+      setError("Please enter pickup or destination address.");
+      return;
+    }
+
+    if (pickup.length < 3 || destination.length < 3) {
+      setError("Pickup or destination should be at least 3 characters");
+      return;
+    }
 
     // fetch vehicle options
     try {
@@ -213,9 +257,25 @@ const Home = () => {
           },
         }
       );
-      response.status === 200 && setFare(response.data);
+      if (response.status === 200) {
+        setFare(response.data);
+        setVehiclePanel(true);
+        setPanelOpen(false);
+      }
     } catch (error) {
-      console.error(error);
+      if (
+        error.response.data.message ===
+        "Cannot read properties of undefined (reading 'value')"
+      ) {
+        setError("Please enter a valid pickup or destination address.");
+        return;
+      }
+
+      setError(
+        error.response.data.message ||
+          error.response.data.error ||
+          error.message
+      );
     }
   };
 
@@ -241,6 +301,11 @@ const Home = () => {
       setPanelOpen(false);
     } catch (error) {
       console.error(error);
+      setError(
+        error.response.data.message ||
+          error.response.data.error ||
+          error.message
+      );
     }
   };
 
@@ -276,7 +341,7 @@ const Home = () => {
 
           <h4 className="text-2xl font-semibold">Find a trip</h4>
           <form
-            className="relative py-2"
+            className="relative py-2 bg-white"
             onSubmit={(e) => {
               submitHandler(e);
             }}
@@ -305,12 +370,20 @@ const Home = () => {
               placeholder="Enter your destination"
             />
           </form>
-          <button
-            onClick={findTrip}
-            className="bg-black text-white px-4 py-2 rounded-lg mt-3 w-full"
-          >
-            Find Trip
-          </button>
+
+          {error && (
+            <span className="text-red-500 bg-white inline-block w-full text-left">
+              {error}
+            </span>
+          )}
+          <div className="bg-white">
+            <button
+              onClick={findTrip}
+              className="bg-black text-white px-4 py-2 rounded-lg mt-3 w-full"
+            >
+              Find Trip
+            </button>
+          </div>
         </div>
 
         {/* LocationSearchPanel */}

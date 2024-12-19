@@ -23,7 +23,7 @@ router.post(
 router.post(
   "/login",
   [
-    body("email").isEmail().withMessage("Email or password is incorrect"),
+    body("email").isEmail().withMessage("Enter a valid email address"),
     body("password")
       .isLength({ min: 6 })
       .withMessage("Email or password is incorrect"),
