@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CaptainDataContext } from "../context/CaptainContext";
 
 const CaptainProtectWrappper = ({ children }) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("captain-token");
   const navigate = useNavigate();
 
   const { captain, setCaptain } = useContext(CaptainDataContext);
@@ -15,7 +15,7 @@ const CaptainProtectWrappper = ({ children }) => {
     }
 
     axios
-      .get(`${import.meta.env.VITE_BASE_URL}/captain/profile`, {
+      .get(`${import.meta.env.VITE_BASE_URL}/captains/profile`, {
         headers: { authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -26,7 +26,7 @@ const CaptainProtectWrappper = ({ children }) => {
       })
       .catch((error) => {
         console.error(error);
-        localStorage.removeItem("token");
+        localStorage.removeItem("captain-token");
         navigate("/captain-login");
         setIsLoading(false);
       });

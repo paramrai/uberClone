@@ -48,9 +48,9 @@ const App = () => {
         <Route
           path="/captain-home"
           element={
-            // <CaptainProtectWrappper>
-            <CaptainHome />
-            // </CaptainProtectWrappper>
+            <CaptainProtectWrappper>
+              <CaptainHome />
+            </CaptainProtectWrappper>
           }
         />
         <Route

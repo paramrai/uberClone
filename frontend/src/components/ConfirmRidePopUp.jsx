@@ -14,7 +14,7 @@ const ConfirmRidePopUp = (props) => {
       `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
       {
         headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
+          authorization: `Bearer ${localStorage.getItem("captain-token")}`,
         },
         params: {
           rideId: props.ride._id,
