@@ -41,7 +41,7 @@ const Home = () => {
     e.preventDefault();
   };
 
-  const { user } = useContext(UserDataContext);
+  const { user, updateUser } = useContext(UserDataContext);
   const { socket } = useContext(SocketContext);
   const navigate = useNavigate();
 
@@ -49,7 +49,12 @@ const Home = () => {
     if (user) {
       socket.emit("join", { userType: "user", userId: user._id });
     }
-  }, [user]);
+
+    socket.on("join-success", (data) => {
+      updateUser(data.user);
+      console.log(data.user);
+    });
+  }, [user?._id]);
 
   useEffect(() => {
     if (error) {
@@ -79,7 +84,6 @@ const Home = () => {
           scrollbarWidth: "0",
           scrollbarColor: "transparent transparent",
         });
-
         gsap.to(panelCloseRef.current, {
           opacity: 1,
         });

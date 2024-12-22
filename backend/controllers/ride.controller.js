@@ -18,7 +18,7 @@ module.exports.createRide = async (req, res) => {
   try {
     // create a ride store in database
     const ride = await rideService.createRide({
-      user: req.user._id,
+      user: user._id,
       pickup,
       destination,
       vehicleType,
@@ -44,8 +44,9 @@ module.exports.createRide = async (req, res) => {
       .findOne({ _id: ride._id })
       .populate("user");
 
+    // send the ride to captains
     captainsInRadius.map((captain) => {
-      console.log(captain.socketId);
+      console.log({ captainAvailable: [captain.socketId] });
       sendMessageToSocketId(captain.socketId, {
         event: "new-ride",
         data: rideWithUser,

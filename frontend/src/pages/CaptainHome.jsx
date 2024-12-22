@@ -49,16 +49,21 @@ const CaptainHome = () => {
   );
 
   const { socket } = useContext(SocketContext);
-  const { captain } = useContext(CaptainDataContext);
+  const { captain, updateCaptain } = useContext(CaptainDataContext);
 
   useEffect(() => {
     if (!captain?._id) return;
 
-    console.log({ captain });
     socket.emit("join", {
       userId: captain._id,
       userType: "captain",
     });
+
+    // Wait for successful connection
+    socket.on("join-success", async (data) => {
+      updateCaptain(data.captain);
+    });
+
     const updateLocation = () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
@@ -80,18 +85,38 @@ const CaptainHome = () => {
     return () => {
       clearInterval(locationInterval);
       socket.off("new-ride");
+      socket.off("join-success");
     };
-  }, [captain, socket]);
+  }, [captain?.id, socket]);
 
   useEffect(() => {
-    // Set up socket listener separately
-    socket.on("new-ride", (data) => {
-      setRide(data);
-      setRidePopupPanel(true);
-    });
+    if (!socket) return;
 
+    // Handler function for new ride events
+    const handleNewRide = (data) => {
+      console.log("New ride received:", data);
+
+      // Validate ride data
+      if (!data) {
+        console.error("Invalid ride data received");
+        return;
+      }
+
+      // Update ride state first
+      setRide(data);
+
+      // Small delay to ensure state is updated before animation
+      setTimeout(() => {
+        setRidePopupPanel(true);
+      }, 100);
+    };
+
+    // Set up event listener
+    socket.on("new-ride", handleNewRide);
+
+    // Cleanup function
     return () => {
-      socket.off("new-ride");
+      socket.off("new-ride", handleNewRide);
     };
   }, [socket]);
 

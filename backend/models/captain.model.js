@@ -27,11 +27,12 @@ const captainSchema = new mongoose.Schema({
   },
   socketId: {
     type: String,
+    default: null,
   },
   status: {
     type: String,
     enum: ["active", "inactive"],
-    default: "active",
+    default: "inactive",
   },
   vehicle: {
     color: {

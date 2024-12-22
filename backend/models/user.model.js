@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
   socketId: {
     type: String,
   },
+  isOnline: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Generate authorization token
