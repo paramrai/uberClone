@@ -3,19 +3,35 @@ import { useEffect } from "react";
 import { createContext } from "react";
 import { io } from "socket.io-client";
 
-const socket = io(`${import.meta.env.VITE_BASE_URL}`);
+const socket = io(import.meta.env.VITE_BASE_URL, {
+  transports: ["websocket", "polling"],
+  reconnection: true,
+  reconnectionAttempts: 5,
+});
 
 export const SocketContext = createContext();
 
 const SocketProvider = ({ children }) => {
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("Connected to the server");
+      console.log("Socket connected:", socket.id);
+      setIsConnected(true);
     });
 
     socket.on("disconnect", () => {
-      console.log("Disconnected from the server");
+      console.log("Socket disconnected");
+      setIsConnected(false);
     });
+
+    socket.on("error", (error) => {
+      console.error("Socket error:", error);
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("error");
+    };
   }, []);
 
   return (
