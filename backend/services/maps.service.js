@@ -80,11 +80,12 @@ module.exports.getAutoCompleteSuggestions = async (input) => {
 // get capains in radius
 module.exports.getCaptainInRadius = async (ltd, lng, radius) => {
   const captains = await captainModel.find({
-    location: {
-      $geoWithin: {
-        $centerSphere: [[lng, ltd], radius / 6371],
-      },
-    },
+    status: "active",
+    // location: {
+    //   $geoWithin: {
+    //     $centerSphere: [[lng, ltd], radius / 6371],
+    //   },
+    // },
   });
 
   return captains;

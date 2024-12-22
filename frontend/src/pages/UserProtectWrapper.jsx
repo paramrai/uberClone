@@ -11,26 +11,29 @@ const UserProtectWrapper = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
-      navigate("/login");
-    }
-
-    axios
-      .get(`${import.meta.env.VITE_BASE_URL}/users/profile`, {
-        headers: { authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          setUser(response.data);
-        }
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        localStorage.removeItem("token");
+    async function fetchUser() {
+      if (!token) {
         navigate("/login");
-        setIsLoading(false);
-      });
+      }
+
+      await axios
+        .get(`${import.meta.env.VITE_BASE_URL}/users/profile`, {
+          headers: { authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            setUser(response.data);
+          }
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          localStorage.removeItem("token");
+          navigate("/login");
+          setIsLoading(false);
+        });
+    }
+    fetchUser();
   }, [token]);
 
   if (isLoading) {

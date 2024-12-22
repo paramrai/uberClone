@@ -138,15 +138,9 @@ const Home = () => {
         gsap.to(vehicleFoundRef.current, {
           transform: "translateY(0)",
         });
-        gsap.to(confirmRidePanelRef.current, {
-          opacity: 0,
-        });
       } else {
         gsap.to(vehicleFoundRef.current, {
           transform: "translateY(100%)",
-        });
-        gsap.to(confirmRidePanelRef.current, {
-          opacity: 1,
         });
       }
     },
@@ -297,7 +291,7 @@ const Home = () => {
           },
         }
       );
-      setConfirmRidePanel(true);
+      setConfirmRidePanel(false);
       setPanelOpen(false);
     } catch (error) {
       console.error(error);
@@ -406,7 +400,7 @@ const Home = () => {
       {/* Vehicle Panel */}
       <div
         ref={vehiclePanelRef}
-        className="fixed w-96 mx-auto z-10 bottom-0 bg-white translate-y-full  px-3 py-10 pt-12"
+        className="fixed w-96 mx-auto z-11 bottom-0 bg-white translate-y-full  px-3 py-10 pt-12"
       >
         <VehiclePanel
           selectVehicle={setVehicleType}
@@ -435,7 +429,7 @@ const Home = () => {
       {/* Looking for driver modal */}
       <div
         ref={vehicleFoundRef}
-        className="fixed w-96 mx-auto z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12"
+        className="fixed w-96 mx-auto z-9 bottom-0 translate-y-full bg-white px-3 py-6 pt-12"
       >
         <LookingForDriver
           createRide={createRide}
@@ -450,7 +444,7 @@ const Home = () => {
       {/* Waiting for driver modal */}
       <div
         ref={waitingForDriverRef}
-        className="fixed w-96 mx-auto z-10 bottom-0 px-3 py-6 bg-white"
+        className="fixed w-96 mx-auto z-8 bottom-0 px-3 py-6 bg-white"
       >
         <WaitingForDriver
           ride={ride}

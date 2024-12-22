@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import CaptainDetails from "../components/CaptainDetails";
 import RidePopup from "../components/RidePopup";
@@ -51,13 +51,52 @@ const CaptainHome = () => {
   const { socket } = useContext(SocketContext);
   const { captain } = useContext(CaptainDataContext);
 
-  socket.on("new-ride", (data) => {
-    setRide(data);
-    setRidePopupPanel(true);
-  });
+  useEffect(() => {
+    if (!captain?._id) return;
+
+    console.log({ captain });
+    socket.emit("join", {
+      userId: captain._id,
+      userType: "captain",
+    });
+    const updateLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          socket.emit("update-location-captain", {
+            userId: captain._id,
+            location: {
+              ltd: position.coords.latitude,
+              lng: position.coords.longitude,
+            },
+          });
+        });
+      }
+    };
+
+    const locationInterval = setInterval(updateLocation, 10000);
+    updateLocation();
+
+    // Cleanup function
+    return () => {
+      clearInterval(locationInterval);
+      socket.off("new-ride");
+    };
+  }, [captain, socket]);
+
+  useEffect(() => {
+    // Set up socket listener separately
+    socket.on("new-ride", (data) => {
+      setRide(data);
+      setRidePopupPanel(true);
+    });
+
+    return () => {
+      socket.off("new-ride");
+    };
+  }, [socket]);
 
   async function confirmRide() {
-    const response = await axios.post(
+    await axios.post(
       `${import.meta.env.VITE_BASE_URL}/rides/confirm`,
       {
         rideId: ride._id,

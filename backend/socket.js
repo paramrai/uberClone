@@ -20,17 +20,22 @@ function initializeSocket(server) {
 
       console.log(`User ${userId} joined as ${userType}`);
 
+      // Handle user/captain socket connection
       if (userType === "user") {
         await userModel.findByIdAndUpdate(userId, { socketId: socket.id });
       } else if (userType === "captain") {
-        await captainModel.findByIdAndUpdate(captainId, {
+        await captainModel.findByIdAndUpdate(userId, {
           socketId: socket.id,
         });
       }
     });
 
-    socket.on("disconnect", () => {
+    // Handle disconnect
+    socket.on("disconnect", async () => {
       console.log(`Client disconnected: ${socket.id}`);
+      // Remove socketId on disconnect
+      await userModel.updateOne({ socketId: socket.id }, { socketId: null });
+      await captainModel.updateOne({ socketId: socket.id }, { socketId: null });
     });
 
     socket.on("update-captain-location", async (data) => {
