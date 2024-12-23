@@ -10,6 +10,7 @@ import axios from "axios";
 import { UserDataContext } from "../context/UserContext";
 import { SocketContext } from "../context/SocketContext";
 import { useNavigate } from "react-router-dom";
+import LiveTracking from "../components/LiveTracking";
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -342,18 +343,13 @@ const Home = () => {
         alt=""
       />
 
-      {/* image for temporary use  */}
-      <div className="h-screen w-screen">
-        <img
-          className="h-full w-full object-cover"
-          src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
-          alt=""
-        />
+      <div className="h-3/5">
+        <LiveTracking />
       </div>
 
       {/* find a trip from input  */}
       <div className=" flex flex-col justify-end h-screen absolute top-0 w-full">
-        <div className="h-[30%] p-3 bg-white relative">
+        <div className="h-[calc(100%-3/5)] p-3 bg-white relative">
           <h5
             ref={panelCloseRef}
             onClick={() => {

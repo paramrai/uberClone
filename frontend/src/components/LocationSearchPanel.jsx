@@ -19,7 +19,7 @@ const LocationSearchPanel = ({
   };
 
   return (
-    <div className="pt-[50px]">
+    <div className="">
       {/* Display fetched suggestions */}
       {suggestions.map((elem, idx) => (
         <div
