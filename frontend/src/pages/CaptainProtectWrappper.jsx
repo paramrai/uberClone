@@ -23,6 +23,7 @@ const CaptainProtectWrappper = ({ children }) => {
         .then((response) => {
           if (response.status === 200) {
             setCaptain(response.data.captain);
+            navigate("/captain-home");
           }
           setIsLoading(false);
         })

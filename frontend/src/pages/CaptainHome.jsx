@@ -61,7 +61,10 @@ const CaptainHome = () => {
 
     // Wait for successful connection
     socket.on("join-success", async (data) => {
-      updateCaptain(data.captain);
+      if (data?.captain) {
+        updateCaptain(data.captain);
+      }
+      console.log(data.captain);
     });
 
     const updateLocation = () => {
@@ -84,7 +87,6 @@ const CaptainHome = () => {
     // Cleanup function
     return () => {
       clearInterval(locationInterval);
-      socket.off("new-ride");
       socket.off("join-success");
     };
   }, [captain?.id, socket]);

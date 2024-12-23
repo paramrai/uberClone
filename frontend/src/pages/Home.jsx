@@ -169,7 +169,6 @@ const Home = () => {
   const handlePickupChange = async (e) => {
     setPickup(e.target.value);
     if (e.target.value.length < 3) {
-      setError("Please enter a valid pickup or destination");
       return;
     }
     const token = localStorage.getItem("token");
@@ -201,7 +200,6 @@ const Home = () => {
   const handleDestinationChange = async (e) => {
     setDestination(e.target.value);
     if (e.target.value.length < 3) {
-      setError("Please enter a valid pickup or destination");
       return;
     }
     const token = localStorage.getItem("token");
@@ -269,6 +267,35 @@ const Home = () => {
         return;
       }
 
+      setError(
+        error.response.data.message ||
+          error.response.data.error ||
+          error.message
+      );
+    }
+
+    // get the distance and time taken from the pickup to destination
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/maps/get-distance-time`,
+        {
+          params: {
+            origin: pickup,
+            destination,
+          },
+        },
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        console.log(`distance&Time : ${response.data}`);
+      }
+    } catch (error) {
+      console.error(error);
       setError(
         error.response.data.message ||
           error.response.data.error ||
@@ -407,6 +434,7 @@ const Home = () => {
         className="fixed w-96 mx-auto z-11 bottom-0 bg-white translate-y-full  px-3 py-10 pt-12"
       >
         <VehiclePanel
+          time={ride?.duration.text}
           selectVehicle={setVehicleType}
           fare={fare}
           setConfirmRidePanel={setConfirmRidePanel}

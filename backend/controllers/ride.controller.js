@@ -2,6 +2,7 @@ const rideModel = require("../models/ride.model");
 const {
   getAddressCoordinate,
   getCaptainInRadius,
+  getDistanceTime,
 } = require("../services/maps.service");
 const rideService = require("../services/ride.service");
 const { validationResult } = require("express-validator");
@@ -16,12 +17,19 @@ module.exports.createRide = async (req, res) => {
   const { user, pickup, destination, vehicleType } = req.body;
 
   try {
+    // get distance and time
+    const distanceTime = await getDistanceTime(pickup, destination);
+    const time = distanceTime.duration;
+    const distance = distanceTime.distance;
+
     // create a ride store in database
     const ride = await rideService.createRide({
       user: user._id,
       pickup,
       destination,
       vehicleType,
+      time,
+      distance,
     });
 
     // get the pickup coordinates
@@ -34,6 +42,8 @@ module.exports.createRide = async (req, res) => {
       2
     );
 
+    console.log({ captainsInRadius });
+
     if (captainsInRadius.length === 0) {
       return res.status(404).json({ message: "No nearby captains found" });
     }
@@ -44,6 +54,7 @@ module.exports.createRide = async (req, res) => {
       .findOne({ _id: ride._id })
       .populate("user");
 
+    console.log({ rideWithUser });
     // send the ride to captains
     captainsInRadius.map((captain) => {
       console.log({ captainAvailable: [captain.socketId] });
@@ -52,9 +63,7 @@ module.exports.createRide = async (req, res) => {
         data: rideWithUser,
       });
     });
-    res.status(201).json({
-      message: "Ride with user created successfully and sent to captains",
-    });
+    return res.status(201).json(rideWithUser);
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: err.message });

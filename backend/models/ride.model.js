@@ -29,12 +29,14 @@ const rideSchema = new mongoose.Schema({
     default: "pending",
   },
 
-  duration: {
-    type: Number,
+  time: {
+    text: String,
+    value: Number,
   }, // in seconds
 
   distance: {
-    type: Number,
+    text: String,
+    value: Number,
   }, // in meters
 
   paymentID: {
