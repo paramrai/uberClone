@@ -29,7 +29,7 @@ module.exports.registerUser = async function (req, res) {
 
   // Generate and send the JWT token to the client
   const token = await user.generateAuthToken();
-  res.status(201).json({ user, token });
+  return res.status(201).json({ user, token });
 };
 
 // Login a user by their email and password
@@ -64,7 +64,7 @@ module.exports.loginUser = async function (req, res, next) {
 };
 
 module.exports.getUserProfile = async function (req, res, next) {
-  res.status(200).json(req.user);
+  return res.status(200).json(req.user);
 };
 
 module.exports.logoutUser = async (req, res, next) => {
@@ -72,5 +72,5 @@ module.exports.logoutUser = async (req, res, next) => {
   const token = req.cookies.token || req.headers.authorization.split(" ")[1];
 
   await blacklistTokenModel.create({ token });
-  res.status(200).json({ message: "Logged Out Successfully" });
+  return res.status(200).json({ message: "Logged Out Successfully" });
 };

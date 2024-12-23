@@ -22,22 +22,31 @@ function initializeSocket(server) {
 
         // Handle user/captain socket connection
         if (userType === "user") {
-          const user = await userModel.findByIdAndUpdate(userId, {
-            socketId: socket.id,
-            isOnline: true,
-          });
-          console.log("User connected  " + "UserSocketId:", socket.id);
-          socket.emit("join-success", { user });
-        } else if (userType === "captain") {
-          const captain = await captainModel.findByIdAndUpdate(
-            userId,
-            {
+          const user = await userModel
+            .findByIdAndUpdate(userId, {
               socketId: socket.id,
-              status: "active",
-            },
-            { new: true }
-          );
-          socket.emit("join-success", { captain });
+              isOnline: true,
+            })
+            .lean();
+          console.log("User connected  " + "UserSocketId:", socket.id);
+          socket.emit("join-success", {
+            user: { ...user, socketId: socket.id },
+          });
+        } else if (userType === "captain") {
+          const captain = await captainModel
+            .findByIdAndUpdate(
+              userId,
+              {
+                socketId: socket.id,
+                status: "active",
+              },
+              { new: true }
+            )
+            .lean();
+
+          socket.emit("join-success", {
+            captain: { ...captain, socketId: socket.id },
+          });
           console.log("Captain connected  " + "CaptainSocketId:", socket.id);
         }
       } catch (error) {

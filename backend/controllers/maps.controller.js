@@ -16,9 +16,9 @@ module.exports.getCoordinates = async function (req, res, next) {
 
   try {
     const coordinates = await getAdrressCoordinates(address); // returns latitude and longitude
-    res.status(200).json(coordinates);
+    return res.status(200).json(coordinates);
   } catch (error) {
-    res.status(400).json({ error: "Coordinates not found" });
+    return res.status(400).json({ error: "Coordinates not found" });
   }
 };
 
@@ -33,9 +33,9 @@ module.exports.getDistanceTime = async function (req, res) {
 
   try {
     const distanceTime = await getDistanceTime(origin, destination);
-    res.status(200).json(distanceTime);
+    return res.status(200).json(distanceTime);
   } catch (error) {
-    res.status(400).json({ error: "Distance and time not found" });
+    return res.status(400).json({ error: "Distance and time not found" });
   }
 };
 
@@ -50,8 +50,10 @@ module.exports.getAutoCompleteSuggestions = async function (req, res) {
 
   try {
     const autoCompleteSuggestions = await getAutoCompleteSuggestions(input);
-    res.status(200).json(autoCompleteSuggestions);
+    return res.status(200).json(autoCompleteSuggestions);
   } catch (error) {
-    res.status(400).json({ error: "Auto complete suggestions not found" });
+    return res
+      .status(400)
+      .json({ error: "Auto complete suggestions not found" });
   }
 };
