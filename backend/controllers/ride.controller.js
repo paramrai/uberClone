@@ -52,7 +52,8 @@ module.exports.createRide = async (req, res) => {
     ride.otp = "";
     const rideWithUser = await rideModel
       .findOne({ _id: ride._id })
-      .populate("user");
+      .populate("user")
+      .select("-otp");
 
     console.log({ rideWithUser });
     // send the ride to captains
@@ -92,18 +93,19 @@ module.exports.confirmRide = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { rideId } = req.body;
+  const { rideId, captain } = req.body;
 
   try {
     const ride = await rideService.confirmRide({
       rideId,
-      captain: req.captain,
+      captain,
     });
     sendMessageToSocketId(ride.user.socketId, {
       event: "ride-confirmed",
       data: ride,
     });
-    return res.status(200).json(ride);
+    console.log("Ride is confirmed by captain");
+    return res.status(200).json({ message: "Ride is confirmed" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: error.message });
@@ -123,10 +125,9 @@ module.exports.startRide = async (req, res) => {
     const ride = await rideService.startRide({
       rideId,
       otp,
-      captain: req.captain,
     });
 
-    // send message to socket id
+    // send message to user that ride started by captain
     sendMessageToSocketId(ride.user.socketId, {
       event: "ride-started",
       data: ride,

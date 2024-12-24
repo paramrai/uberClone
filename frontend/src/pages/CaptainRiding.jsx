@@ -69,7 +69,7 @@ const CaptainRiding = () => {
       >
         <FinishRide ride={rideData} setFinishRidePanel={setFinishRidePanel} />
       </div>
-      <div className="h-screen fixed w-screen top-0 z-[-1]">
+      <div className="h-screen fixed w-screen top-0 z-[-1] max-w-96">
         <LiveTracking />
       </div>
     </div>

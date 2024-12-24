@@ -87,33 +87,32 @@ module.exports.createRide = async ({
   return ride;
 };
 
-module.exports.confirmRide = async (rideId, captain) => {
+module.exports.confirmRide = async ({ rideId, captain }) => {
   if (!rideId) throw new Error("rideId is required");
 
-  await rideModel.findByIdAndUpdate(
-    {
-      _id: rideId,
-    },
-    {
-      status: "accepted",
-      captain: captain._id,
-    }
-  );
-
-  const ride = await rideModel
-    .findByIdAndUpdate({
-      _id: rideId,
-    })
+  const acceptedRide = await rideModel
+    .findByIdAndUpdate(
+      {
+        _id: rideId,
+      },
+      {
+        status: "accepted",
+        captain: captain._id,
+      },
+      {
+        new: true,
+      }
+    )
     .populate("user")
     .populate("captain")
     .select("+otp");
 
-  if (!ride) throw new Error("No such ride");
+  if (!acceptedRide) throw new Error("No such ride");
 
-  return ride;
+  return acceptedRide;
 };
 
-module.exports.startRide = async ({ rideId, otp, cap }) => {
+module.exports.startRide = async ({ rideId, otp }) => {
   if (!rideId || !otp) throw new Error("Ride Id and otp is required");
 
   const ride = await rideModel.findOne({
@@ -125,7 +124,7 @@ module.exports.startRide = async ({ rideId, otp, cap }) => {
 
   if (ride.status !== "accepted") throw new Error("Ride is not accepted");
 
-  if (ride.otp !== otp) throw new Error("otp is not valid");
+  if (ride.otp !== otp) throw new Error("Otp is not valid");
 
   await rideModel.findByIdAndUpdate(
     {

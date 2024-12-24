@@ -8,6 +8,12 @@ const ConfirmRidePopUp = (props) => {
 
   const submitHander = async (e) => {
     e.preventDefault();
+    console.log(props.ride);
+
+    if (!otp || otp.length !== 6) {
+      alert("Please enter a valid OTP");
+      return;
+    }
 
     // start the ride
     const response = axios.get(
@@ -99,12 +105,12 @@ const ConfirmRidePopUp = (props) => {
               className="bg-[#eee] px-6 py-4 font-mono text-lg rounded-lg w-full mt-3"
               placeholder="Enter OTP"
             />
-            <Link
-              to="/captain-riding"
+            <button
+              type="submit"
               className="w-full mt-5 text-lg flex justify-center bg-green-600 text-white font-semibold p-3 rounded-lg"
             >
               Confirm
-            </Link>
+            </button>
             <button
               onClick={() => {
                 props.setConfirmRidePopupPanel(false);

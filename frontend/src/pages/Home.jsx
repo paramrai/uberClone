@@ -37,6 +37,7 @@ const Home = () => {
   const confirmRidePanelRef = useRef(null);
   const waitingForDriverRef = useRef(null);
   const vehicleFoundRef = useRef(null);
+  const liveTrackingRef = useRef(null);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -64,13 +65,14 @@ const Home = () => {
     }
   });
 
-  socket.emit("ride-confirmed", (ride) => {
+  socket.on("ride-confirmed", (ride) => {
     setVehicleFound(false);
     setWaitingForDriver(true);
     setRide(ride);
+    console.log("Ride is accepted by captain", ride);
   });
 
-  socket.emit("ride-started", (ride) => {
+  socket.on("ride-started", (ride) => {
     setWaitingForDriver(false);
     navigate("/riding", { state: { ride } });
   });
@@ -88,6 +90,12 @@ const Home = () => {
         gsap.to(panelCloseRef.current, {
           opacity: 1,
         });
+        gsap.to(vehiclePanelRef.current, {
+          opacity: 0,
+        });
+        gsap.to(liveTrackingRef.current, {
+          height: 0,
+        });
       } else {
         gsap.to(panelRef.current, {
           height: 0,
@@ -95,6 +103,12 @@ const Home = () => {
         });
         gsap.to(panelCloseRef.current, {
           opacity: 0,
+        });
+        gsap.to(vehiclePanelRef.current, {
+          opacity: 1,
+        });
+        gsap.to(liveTrackingRef.current, {
+          height: "100%",
         });
       }
     },
@@ -143,9 +157,15 @@ const Home = () => {
         gsap.to(vehicleFoundRef.current, {
           transform: "translateY(0)",
         });
+        gsap.to(waitingForDriverRef.current, {
+          opacity: 0,
+        });
       } else {
         gsap.to(vehicleFoundRef.current, {
           transform: "translateY(100%)",
+        });
+        gsap.to(waitingForDriverRef.current, {
+          opacity: 1,
         });
       }
     },
@@ -259,6 +279,22 @@ const Home = () => {
         setVehiclePanel(true);
         setPanelOpen(false);
       }
+
+      const distanceTime = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/maps/get-distance-time`,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+          params: {
+            origin: pickup,
+            destination,
+          },
+        }
+      );
+      if (distanceTime.status === 200) {
+        console.log(`distance&Time : ${distanceTime.data}`);
+      }
     } catch (error) {
       if (
         error.response.data.message ===
@@ -274,42 +310,13 @@ const Home = () => {
           error.message
       );
     }
-
-    // get the distance and time taken from the pickup to destination
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/maps/get-distance-time`,
-        {
-          params: {
-            origin: pickup,
-            destination,
-          },
-        },
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.status === 200) {
-        console.log(`distance&Time : ${response.data}`);
-      }
-    } catch (error) {
-      console.error(error);
-      setError(
-        error.response.data.message ||
-          error.response.data.error ||
-          error.message
-      );
-    }
   };
 
   const createRide = async () => {
     // create ride
     try {
       const token = localStorage.getItem("token");
-      await axios.post(
+      const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/rides/create`,
         {
           user,
@@ -325,6 +332,7 @@ const Home = () => {
       );
       setConfirmRidePanel(false);
       setPanelOpen(false);
+      setRide(response.data);
     } catch (error) {
       console.error(error);
       setError(
@@ -337,19 +345,11 @@ const Home = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden max-w-96 mx-auto">
-      <img
-        className="w-16 absolute left-5 top-5"
-        src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
-        alt=""
-      />
-
-      <div className="h-3/5">
-        <LiveTracking />
-      </div>
-
-      {/* find a trip from input  */}
       <div className=" flex flex-col justify-end h-screen absolute top-0 w-full">
-        <div className="h-[calc(100%-3/5)] p-3 bg-white relative">
+        <div className="h-[70%]" ref={liveTrackingRef}>
+          <LiveTracking />
+        </div>
+        <div className="h-[30%] p-3 bg-white relative">
           <h5
             ref={panelCloseRef}
             onClick={() => {
@@ -430,7 +430,7 @@ const Home = () => {
         className="fixed w-96 mx-auto z-11 bottom-0 bg-white translate-y-full  px-3 py-10 pt-12"
       >
         <VehiclePanel
-          time={ride?.duration.text}
+          time={ride?.duration?.text}
           selectVehicle={setVehicleType}
           fare={fare}
           setConfirmRidePanel={setConfirmRidePanel}
@@ -472,7 +472,7 @@ const Home = () => {
       {/* Waiting for driver modal */}
       <div
         ref={waitingForDriverRef}
-        className="fixed w-96 mx-auto z-8 bottom-0 px-3 py-6 bg-white"
+        className="fixed w-96 mx-auto z-8 bottom-0 translate-y-full px-3 py-6 bg-white"
       >
         <WaitingForDriver
           ride={ride}

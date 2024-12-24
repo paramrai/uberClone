@@ -127,7 +127,7 @@ const CaptainHome = () => {
       `${import.meta.env.VITE_BASE_URL}/rides/confirm`,
       {
         rideId: ride._id,
-        captainId: captain._id,
+        captain,
       },
       {
         headers: {

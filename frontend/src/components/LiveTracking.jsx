@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { LoadScript, GoogleMap, Marker } from "@react-google-maps/api";
 
 const containerStyle = {
@@ -7,16 +7,18 @@ const containerStyle = {
 };
 
 const center = {
-  lat: -3.745,
-  lng: -38.523,
+  lat: 29.442321,
+  lng: 74.750543,
 };
 
 const LiveTracking = () => {
   const [currentPosition, setCurrentPosition] = useState(center);
 
+  // Fetch user's current position
   useEffect(() => {
     const handleSuccess = (position) => {
       const { latitude, longitude } = position.coords;
+      console.log("Current Position:", latitude, longitude);
       setCurrentPosition({
         lat: latitude,
         lng: longitude,
@@ -47,7 +49,7 @@ const LiveTracking = () => {
         center={currentPosition}
         zoom={14}
       >
-        <Marker position={currentPosition} />
+        {currentPosition && <Marker position={currentPosition} />}
       </GoogleMap>
     </LoadScript>
   );
