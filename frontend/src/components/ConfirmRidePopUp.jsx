@@ -1,14 +1,14 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const ConfirmRidePopUp = (props) => {
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
+  const { captain } = props;
 
   const submitHander = async (e) => {
     e.preventDefault();
-    console.log(props.ride);
 
     if (!otp || otp.length !== 6) {
       alert("Please enter a valid OTP");
@@ -16,7 +16,7 @@ const ConfirmRidePopUp = (props) => {
     }
 
     // start the ride
-    const response = axios.get(
+    const response = await axios.get(
       `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
       {
         headers: {
@@ -25,6 +25,7 @@ const ConfirmRidePopUp = (props) => {
         params: {
           rideId: props.ride._id,
           otp,
+          captain,
         },
       }
     );
