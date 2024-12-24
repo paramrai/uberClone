@@ -31,18 +31,15 @@ const UserLogin = () => {
         localStorage.setItem("token", token);
         navigate("/home");
         setUser(user);
-        console.log(user);
-        console.log(token);
       } else {
         console.error("Error:", data.message);
       }
     } catch (error) {
-      console.log(error);
       if (error.status === 401) {
         setError("Invalid email or password");
+      } else {
+        setError("Something went wrong");
       }
-
-      setError(error.response.data.errors[0].msg);
     }
   };
 

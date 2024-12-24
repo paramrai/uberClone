@@ -23,10 +23,12 @@ const CaptainHome = () => {
       if (ridePopupPanel) {
         gsap.to(ridePopupPanelRef.current, {
           transform: "translateY(0)",
+          opacity: 1,
         });
       } else {
         gsap.to(ridePopupPanelRef.current, {
           transform: "translateY(100%)",
+          opacity: 0,
         });
       }
     },
@@ -64,7 +66,6 @@ const CaptainHome = () => {
       if (data?.captain) {
         updateCaptain(data.captain);
       }
-      console.log(data.captain);
     });
 
     const updateLocation = () => {
@@ -96,8 +97,6 @@ const CaptainHome = () => {
 
     // Handler function for new ride events
     const handleNewRide = (data) => {
-      console.log("New ride received:", data);
-
       // Validate ride data
       if (!data) {
         console.error("Invalid ride data received");
@@ -185,6 +184,7 @@ const CaptainHome = () => {
         >
           <ConfirmRidePopUp
             ride={ride}
+            captain={captain}
             setConfirmRidePopupPanel={setConfirmRidePopupPanel}
             setRidePopupPanel={setRidePopupPanel}
           />

@@ -50,8 +50,6 @@ const UserSignup = () => {
       setPassword("");
     } catch (error) {
       // handle the error and display it to the user
-      console.log(error);
-      console.log(error.response.data.errors[0].msg);
       setError(error.response.data.errors[0].msg);
     }
   };

@@ -42,8 +42,6 @@ const Captainlogin = () => {
       }
     } catch (error) {
       // set the error
-      console.log(error);
-      console.log(error.status);
       if (
         error.status === 400 ||
         error.status === 401 ||

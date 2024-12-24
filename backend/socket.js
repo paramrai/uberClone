@@ -28,7 +28,6 @@ function initializeSocket(server) {
               isOnline: true,
             })
             .lean();
-          console.log("User connected  " + "UserSocketId:", socket.id);
           socket.emit("join-success", {
             user: { ...user, socketId: socket.id },
           });
@@ -47,7 +46,6 @@ function initializeSocket(server) {
           socket.emit("join-success", {
             captain: { ...captain, socketId: socket.id },
           });
-          console.log("Captain connected  " + "CaptainSocketId:", socket.id);
         }
       } catch (error) {
         console.error("Error in join event:", error);

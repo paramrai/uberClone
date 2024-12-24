@@ -18,7 +18,6 @@ const LiveTracking = () => {
   useEffect(() => {
     const handleSuccess = (position) => {
       const { latitude, longitude } = position.coords;
-      console.log("Current Position:", latitude, longitude);
       setCurrentPosition({
         lat: latitude,
         lng: longitude,

@@ -54,7 +54,6 @@ const Home = () => {
 
     socket.on("join-success", (data) => {
       updateUser(data.user);
-      console.log(data.user);
     });
   }, [user?._id]);
 
@@ -69,7 +68,6 @@ const Home = () => {
     setVehicleFound(false);
     setWaitingForDriver(true);
     setRide(ride);
-    console.log("Ride is accepted by captain", ride);
   });
 
   socket.on("ride-started", (ride) => {
@@ -278,22 +276,6 @@ const Home = () => {
         setFare(response.data);
         setVehiclePanel(true);
         setPanelOpen(false);
-      }
-
-      const distanceTime = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/maps/get-distance-time`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-          params: {
-            origin: pickup,
-            destination,
-          },
-        }
-      );
-      if (distanceTime.status === 200) {
-        console.log(`distance&Time : ${distanceTime.data}`);
       }
     } catch (error) {
       if (
