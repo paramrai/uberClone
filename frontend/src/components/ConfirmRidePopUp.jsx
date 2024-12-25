@@ -15,25 +15,29 @@ const ConfirmRidePopUp = (props) => {
       return;
     }
 
-    // start the ride
-    const response = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
-      {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("captain-token")}`,
-        },
-        params: {
-          rideId: props.ride._id,
-          otp,
-          captain,
-        },
-      }
-    );
+    try {
+      // start the ride
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("captain-token")}`,
+          },
+          params: {
+            rideId: props.ride._id,
+            otp,
+            captain,
+          },
+        }
+      );
 
-    if (response.status === 200) {
-      props.setConfirmRidePopupPanel(false);
-      props.setRidePopupPanel(false);
-      navigate("/captain-riding", { state: { ride: props.ride } });
+      if (response.status === 200) {
+        props.setConfirmRidePopupPanel(false);
+        props.setRidePopupPanel(false);
+        navigate("/captain-riding", { state: { ride: props.ride } });
+      }
+    } catch (error) {
+      alert("Invalid Otp");
     }
   };
 
