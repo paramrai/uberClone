@@ -38,7 +38,7 @@ const UserLogin = () => {
       if (error.status === 401) {
         setError("Invalid email or password");
       } else {
-        setError("Something went wrong");
+        setError("Something went wrong ! Check Network !!!");
       }
     }
   };

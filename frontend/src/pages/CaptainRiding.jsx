@@ -1,15 +1,19 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import FinishRide from "../components/FinishRide";
 import LiveTracking from "../components/LiveTracking";
 
 const CaptainRiding = () => {
   const [finishRidePanel, setFinishRidePanel] = useState(false);
   const finishRidePanelRef = useRef(null);
-
+  const location = useLocation();
   const rideData = location.state?.ride;
+
+  useEffect(() => {
+    console.log(rideData);
+  }, []);
 
   useGSAP(
     function () {
@@ -28,19 +32,12 @@ const CaptainRiding = () => {
 
   return (
     <div className="h-screen relative max-w-96 mx-auto flex flex-col justify-end">
-      <div className="fixed p-6 top-0 flex items-center justify-between w-screen">
-        <img
-          className="w-16"
-          src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
-          alt=""
-        />
-        <Link
-          to="/captain-home"
-          className=" h-10 w-10 bg-white flex items-center justify-center rounded-full"
-        >
-          <i className="text-lg font-medium ri-logout-box-r-line"></i>
-        </Link>
-      </div>
+      <Link
+        to="/captain-home"
+        className=" h-10 w-10 z-10 bg-white flex items-center justify-center rounded-sm absolute top-[65px] right-[10px]"
+      >
+        <i className="text-lg font-medium ri-logout-box-r-line"></i>
+      </Link>
 
       <div
         className="h-1/5 p-6 flex items-center justify-between relative bg-yellow-400 pt-10"
@@ -55,7 +52,8 @@ const CaptainRiding = () => {
           <i className="text-3xl text-gray-800 ri-arrow-up-wide-line"></i>
         </h5>
         <h4 className="text-xl font-semibold">
-          {rideData ? `Ride ID: ${rideData._id}` : "4 KM away"}
+          Distance :<br />
+          {`${rideData?.distance.text}`}
         </h4>
         <button className=" bg-green-600 text-white font-semibold p-3 px-10 rounded-lg">
           Complete Ride
@@ -69,8 +67,11 @@ const CaptainRiding = () => {
       >
         <FinishRide ride={rideData} setFinishRidePanel={setFinishRidePanel} />
       </div>
-      <div className="h-screen fixed w-screen top-0 z-[-1] max-w-96">
-        <LiveTracking />
+      <div className="h-[80%] fixed w-screen top-0 max-w-96">
+        <LiveTracking
+          pickupAddress={rideData?.pickup}
+          destinationAddress={rideData?.destination}
+        />
       </div>
     </div>
   );

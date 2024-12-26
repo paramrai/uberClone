@@ -40,7 +40,7 @@ const FinishRide = (props) => {
             src="https://i.pinimg.com/236x/af/26/28/af26280b0ca305be47df0b799ed1b12b.jpg"
             alt=""
           />
-          <h2 className="text-lg font-medium">
+          <h2 className="text-lg font-medium capitalize">
             {props.ride?.user.fullname.firstname}{" "}
             {props.ride?.user.fullname.lastname}
           </h2>

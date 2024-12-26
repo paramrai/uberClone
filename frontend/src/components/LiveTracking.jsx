@@ -6,7 +6,9 @@ import {
   DirectionsRenderer,
 } from "@react-google-maps/api";
 import { useLocation } from "react-router-dom";
-import icon from "../assets/location.png";
+import current from "../assets/pin.png";
+import pickup from "../assets/location.png";
+import destination from "../assets/locationPin.png";
 
 const containerStyle = {
   width: "100%",
@@ -18,9 +20,7 @@ const initCenter = {
   lng: 74.750543,
 };
 
-const destination = { lat: 28.7041, lng: 77.1025 };
-
-const LiveTracking = () => {
+const LiveTracking = ({ pickupAddress, destinationAddress }) => {
   const [currentPosition, setCurrentPosition] = useState(initCenter);
   const [directions, setDirections] = useState(null);
   const [heading, setHeading] = useState(null);
@@ -28,6 +28,8 @@ const LiveTracking = () => {
   const [zoom, setZoom] = useState(14);
   const [center, setCenter] = useState(initCenter);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [pickupCoords, setPickupCoords] = useState(null);
+  const [destinationCoords, setDestinationCoords] = useState(null);
 
   const [lastKnownPosition, setLastKnownPosition] = useState(null);
   const watchPositionId = useRef(null);
@@ -38,9 +40,86 @@ const LiveTracking = () => {
   const directionsServiceRef = useRef(null);
   const location = useLocation().pathname;
 
+  // convert to jeocode
+  useEffect(() => {
+    const geocodeAddress = async () => {
+      if (!pickupAddress || !destinationAddress) {
+        console.log("Addresses not provided");
+        return;
+      }
+
+      const geocoder = new window.google.maps.Geocoder();
+
+      // Geocode pickup address
+      const pickupResult = await new Promise((resolve, reject) => {
+        geocoder.geocode(
+          {
+            address: pickupAddress,
+            region: "IN", // Add region for better results
+          },
+          (results, status) => {
+            if (status === "OK" && results[0]) {
+              resolve(results[0].geometry.location);
+            } else {
+              reject(status);
+            }
+          }
+        );
+      });
+
+      setPickupCoords({
+        lat: pickupResult.lat(),
+        lng: pickupResult.lng(),
+      });
+
+      // Geocode destination address
+      const destResult = await new Promise((resolve, reject) => {
+        geocoder.geocode(
+          {
+            address: destinationAddress,
+            region: "IN",
+          },
+          (results, status) => {
+            if (status === "OK" && results[0]) {
+              resolve(results[0].geometry.location);
+            } else {
+              reject(status);
+            }
+          }
+        );
+      });
+
+      setDestinationCoords({
+        lat: destResult.lat(),
+        lng: destResult.lng(),
+      });
+    };
+
+    if (
+      map &&
+      window.google &&
+      window.google.maps &&
+      pickupAddress &&
+      destinationAddress
+    ) {
+      geocodeAddress();
+    }
+  }, [map, pickupAddress, destinationAddress]);
+
+  useEffect(() => {
+    if (pickupCoords !== null) {
+      console.log("Pickup", pickupCoords);
+      console.log("destination", destinationCoords);
+    }
+  }, []);
+
   // fetching direction
   const fetchDirections = useCallback(async () => {
-    if (!directionsServiceRef.current || !currentPosition || !destination) {
+    if (
+      !directionsServiceRef.current ||
+      !pickupAddress ||
+      !destinationAddress
+    ) {
       console.log("Direction service or positions not ready");
       return;
     }
@@ -49,7 +128,7 @@ const LiveTracking = () => {
       directionsServiceRef.current.route(
         {
           origin: currentPosition,
-          destination: destination,
+          destination: pickupAddress,
           travelMode: google.maps.TravelMode.DRIVING,
         },
         (result, status) => {
@@ -155,10 +234,7 @@ const LiveTracking = () => {
     };
   }, [getCurrentLocation]);
 
-  // todo setCurrentPosition
-  // todo setHeading use
-
-  // todo onload directionServiceRef
+  // handle on loaded map
   const handleLoad = useCallback(
     (map) => {
       map.setMapTypeId("satellite");
@@ -170,14 +246,14 @@ const LiveTracking = () => {
       directionsServiceRef.current = new google.maps.DirectionsService();
 
       // Fetch directions once everything is loaded
-      if (currentPosition && destination) {
+      if (currentPosition && pickupAddress && destinationAddress) {
         fetchDirections();
       }
     },
     [currentPosition, fetchDirections]
   );
 
-  // todo handle drive mode
+  // handle drive Mode
   const handleDriveMode = () => {
     if (map) {
       map.setZoom(18);
@@ -202,20 +278,59 @@ const LiveTracking = () => {
           <Marker
             position={currentPosition}
             icon={{
-              url: icon,
-              scaledSize: new window.google.maps.Size(50, 50),
-              anchor: new window.google.maps.Point(25, 50),
+              url: current,
+              scaledSize: map && new window.google.maps.Size(50, 50),
+              anchor: map && new window.google.maps.Point(25, 50),
             }}
           />
         )}
-        {directions && <DirectionsRenderer directions={directions} />}
 
-        <button
-          onClick={handleDriveMode}
-          className="bg-white font-semibold rounded-sm shadow-2xl py-2 px-4 w-[35%] absolute left-[50%] translate-x-[-50%]  bottom-4 mx-auto inline-block"
-        >
-          {location === "/captain-home" ? "Navigate" : "Drive"}
-        </button>
+        {pickupCoords && (
+          <Marker
+            position={pickupCoords}
+            icon={{
+              url: pickup,
+              scaledSize: map && new window.google.maps.Size(50, 50),
+              anchor: map && new window.google.maps.Point(25, 50),
+            }}
+          />
+        )}
+
+        {destinationCoords && (
+          <Marker
+            position={destinationCoords}
+            icon={{
+              url: destination,
+              scaledSize: map && new window.google.maps.Size(50, 50),
+              anchor: map && new window.google.maps.Point(25, 50),
+            }}
+          />
+        )}
+        {directions && (
+          <DirectionsRenderer
+            directions={directions}
+            options={{ suppressMarkers: true }}
+          />
+        )}
+
+        {location === "/captain-riding" && (
+          <button
+            onClick={handleDriveMode}
+            className="bg-white font-semibold no-b rounded-sm shadow-2xl py-2 px-4 w-[35%] absolute left-[50%] translate-x-[-50%]  bottom-4 mx-auto inline-block"
+          >
+            Drive
+          </button>
+        )}
+
+        {location === "/home" ||
+          (location === "/captain-home" && (
+            <button
+              onClick={handleDriveMode}
+              className="bg-white font-semibold rounded-sm shadow-2xl py-2 px-4 w-[35%] absolute left-[50%] translate-x-[-50%]  bottom-4 mx-auto inline-block"
+            >
+              Recenter
+            </button>
+          ))}
       </GoogleMap>
     </LoadScript>
   );
