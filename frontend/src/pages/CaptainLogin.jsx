@@ -14,14 +14,15 @@ const Captainlogin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // clear the error afer 10 seconds
+    // clear the error afer 7 seconds
     setTimeout(() => {
       setError(null);
-    }, 10000);
-  }, []);
+    }, 7000);
+  }, [error]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
+
     const captain = {
       email: email,
       password,
@@ -36,23 +37,27 @@ const Captainlogin = () => {
       if (response.status === 200) {
         const data = response.data;
 
-        setCaptain(data.captain);
         localStorage.setItem("captain-token", data.token);
+        setCaptain(data.captain);
         navigate("/captain-home");
+      } else {
+        setError("Login failed: Unexpected response status.");
       }
     } catch (error) {
-      // set the error
+      // Handle errors correctly
       if (
-        error.status === 400 ||
-        error.status === 401 ||
-        error.status === 404
+        error.response &&
+        (error.response.status === 400 ||
+          error.response.status === 401 ||
+          error.response.status === 404)
       ) {
         setError("Invalid email or password");
       } else {
-        setError(error.message);
+        setError("An unexpected error occurred: " + error.message);
       }
     }
   };
+
   return (
     <div className="max-w-96 mx-auto">
       <div className="p-7 h-screen flex flex-col justify-between">
@@ -97,7 +102,10 @@ const Captainlogin = () => {
                 {error}
               </span>
             )}
-            <button className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base">
+            <button
+              type="submit"
+              className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base"
+            >
               Login
             </button>
           </form>

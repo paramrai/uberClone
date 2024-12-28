@@ -53,25 +53,23 @@ const CaptainHome = () => {
   const { socket } = useContext(SocketContext);
   const { captain, updateCaptain } = useContext(CaptainDataContext);
 
+  // Wait for successful connection
   useEffect(() => {
-    if (!captain?._id) return;
+    captain &&
+      socket.emit("join", { userType: "captain", userId: captain._id });
 
-    socket.emit("join", {
-      userId: captain._id,
-      userType: "captain",
-    });
-
-    // Wait for successful connection
-    socket.on("join-success", async (data) => {
-      if (data?.captain) {
-        updateCaptain(data.captain);
-      }
+    socket.on("join-success", (data) => {
+      data &&
+        console.log(
+          `Captain joined from front with socketId: ${data.captain.socketId}`
+        );
+      data && updateCaptain(data.captain);
     });
 
     const updateLocation = () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
-          socket.emit("update-location-captain", {
+          socket.emit("update-captain-location", {
             userId: captain._id,
             location: {
               ltd: position.coords.latitude,
@@ -83,7 +81,7 @@ const CaptainHome = () => {
     };
 
     const locationInterval = setInterval(updateLocation, 10000);
-    updateLocation();
+    captain && updateLocation();
 
     // Cleanup function
     return () => {
@@ -122,21 +120,28 @@ const CaptainHome = () => {
   }, [socket]);
 
   async function confirmRide() {
-    await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/rides/confirm`,
-      {
-        rideId: ride._id,
-        captain,
-      },
-      {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("captain-token")}`,
+    try {
+      captain && console.log(captain);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/rides/confirm`,
+        {
+          rideId: ride._id,
+          captain: captain && captain,
         },
-      }
-    );
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("captain-token")}`,
+          },
+        }
+      );
 
-    setRidePopupPanel(false);
-    setConfirmRidePopupPanel(true);
+      if (response.status === 200) {
+        setRidePopupPanel(false);
+        setConfirmRidePopupPanel(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (

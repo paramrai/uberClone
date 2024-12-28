@@ -53,7 +53,11 @@ const Home = () => {
     }
 
     socket.on("join-success", (data) => {
-      updateUser(data.user);
+      data &&
+        console.log(
+          `user joined from front with socketId: ${data.user.socketId}`
+        );
+      data && updateUser(data.user);
     });
   }, [user?._id]);
 

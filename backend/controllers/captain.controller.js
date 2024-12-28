@@ -49,23 +49,31 @@ module.exports.loginCaptain = async function (req, res) {
 
   const { email, password } = req.body;
 
-  const captain = await captainModel.findOne({ email }).select("+password");
+  try {
+    // Find the captain by email and include the password field
+    const captain = await captainModel.findOne({ email }).select("+password");
 
-  if (!captain) {
-    return res.status(404).json({ message: "invalid email or password" });
+    if (!captain) {
+      return res.status(404).json({ message: "Invalid email or password" });
+    }
+
+    // Check if the password matches
+    const isMatch = await captain.comparePassword(password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Generate an authentication token
+    const token = captain.generateAuthToken();
+
+    // Set token as a cookie
+    res.cookie("token", token);
+    return res.status(200).json({ token, captain });
+  } catch (error) {
+    console.error("Error logging in captain:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
-
-  // is password matches
-  const isMatch = captain.comparePassword(password);
-
-  if (!isMatch) {
-    return res.status(401).json({ message: "invalid email or password" });
-  }
-
-  const token = captain.generateAuthToken();
-
-  res.cookie("token", token);
-  return res.status(200).json({ token, captain });
 };
 
 module.exports.getCaptainProfile = async function (req, res) {
