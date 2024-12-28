@@ -10,7 +10,7 @@ import current from "../assets/car.png";
 import pickup from "../assets/location.png";
 import destination from "../assets/locationPin.png";
 import { Button, ButtonGroup, ButtonToolbar, Spinner } from "react-bootstrap";
-import AlertBox from "./AlertBox";
+import AlertBox from "./captain/AlertBox";
 
 const containerStyle = {
   width: "100%",

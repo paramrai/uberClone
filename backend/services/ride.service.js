@@ -87,7 +87,7 @@ module.exports.createRide = async ({
   return ride;
 };
 
-module.exports.confirmRide = async ({ rideId, captain }) => {
+module.exports.acceptRideRequest = async ({ rideId, captain }) => {
   if (!rideId) throw new Error("rideId is required");
   const acceptedRide = await rideModel
     .findByIdAndUpdate(
@@ -107,7 +107,6 @@ module.exports.confirmRide = async ({ rideId, captain }) => {
     .select("+otp");
 
   if (!acceptedRide) throw new Error("No such ride");
-  acceptedRide && console.log("Ride is accepted by captain");
   return acceptedRide;
 };
 

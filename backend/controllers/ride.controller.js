@@ -87,7 +87,7 @@ module.exports.getFare = async (req, res) => {
   }
 };
 
-module.exports.confirmRide = async (req, res) => {
+module.exports.acceptRideRequest = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -96,16 +96,16 @@ module.exports.confirmRide = async (req, res) => {
   const { rideId, captain } = req.body;
 
   try {
-    const ride = await rideService.confirmRide({
+    const ride = await rideService.acceptRideRequest({
       rideId,
       captain,
     });
     sendMessageToSocketId(ride.user.socketId, {
-      event: "ride-confirmed",
+      event: "ride-accepted",
       data: ride,
     });
-    console.log("Ride is confirmed by captain");
-    return res.status(200).json({ message: "Ride is confirmed" });
+    ride && console.log("Ride is accepted by captain");
+    return res.status(200).json(ride);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: error.message });

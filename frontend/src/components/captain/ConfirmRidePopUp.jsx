@@ -133,3 +133,16 @@ const ConfirmRidePopUp = (props) => {
 };
 
 export default ConfirmRidePopUp;
+
+//   {/* ========= confirm ride pop up ======== */}
+//   <div
+//   ref={confirmRidePopupPanelRef}
+//   className="fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white max-w-96"
+// >
+//   <ConfirmRidePopUp
+//     ride={ride}
+//     captain={captain}
+//     setConfirmRidePopupPanel={setConfirmRidePopupPanel}
+//     setRidePopupPanel={setRidePopupPanel}
+//   />
+// </div>

@@ -1,16 +1,16 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import LocationSearchPanel from "../components/LocationSearchPanel";
-import VehiclePanel from "../components/VehiclePanel";
-import ConfirmRide from "../components/ConfirmRide";
-import WaitingForDriver from "../components/WaitingForDriver";
-import LookingForDriver from "../components/LookingForDriver";
+import LocationSearchPanel from "../../components/user/LocationSearchPanel";
+import VehiclePanel from "../../components/user/VehiclePanel";
+import ConfirmRide from "../../components/user/ConfirmRide";
+import WaitingForDriver from "../../components/user/WaitingForDriver";
+import LookingForDriver from "../../components/user/LookingForDriver";
 import axios from "axios";
-import { UserDataContext } from "../context/UserContext";
-import { SocketContext } from "../context/SocketContext";
+import { UserDataContext } from "../../context/UserContext";
+import { SocketContext } from "../../context/SocketContext";
 import { useNavigate } from "react-router-dom";
-import LiveTracking from "../components/LiveTracking";
+import LiveTracking from "../../components/LiveTracking";
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -68,10 +68,11 @@ const Home = () => {
     }
   });
 
-  socket.on("ride-confirmed", (ride) => {
+  socket.on("ride-accepted", (acceptedRide) => {
+    console.log("Ride accepted: ", acceptedRide);
     setVehicleFound(false);
     setWaitingForDriver(true);
-    setRide(ride);
+    setRide(acceptedRide);
   });
 
   socket.on("ride-started", (ride) => {

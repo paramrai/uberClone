@@ -1,14 +1,13 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import CaptainDetails from "../components/CaptainDetails";
-import RidePopup from "../components/RidePopup";
-import ConfirmRidePopUp from "../components/ConfirmRidePopUp";
+import { Link, useNavigate } from "react-router-dom";
+import AcceptRidePopup from "../../components/captain/AcceptRidePopup";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { SocketContext } from "../context/SocketContext";
+import { SocketContext } from "../../context/SocketContext";
 import axios from "axios";
-import { CaptainDataContext } from "../context/CaptainContext";
-import LiveTracking from "../components/LiveTracking";
+import { CaptainDataContext } from "../../context/CaptainContext";
+import LiveTracking from "../../components/LiveTracking";
+import CaptainDetails from "../../components/captain/CaptainDetails";
 
 const CaptainHome = () => {
   const [ridePopupPanel, setRidePopupPanel] = useState(false);
@@ -17,6 +16,7 @@ const CaptainHome = () => {
   const ridePopupPanelRef = useRef(null);
   const confirmRidePopupPanelRef = useRef(null);
   const [ride, setRide] = useState(null);
+  const navigate = useNavigate();
 
   useGSAP(
     function () {
@@ -119,11 +119,11 @@ const CaptainHome = () => {
     };
   }, [socket]);
 
-  async function confirmRide() {
+  async function acceptRide() {
     try {
       captain && console.log(captain);
       const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/rides/confirm`,
+        `${import.meta.env.VITE_BASE_URL}/rides/acceptRideRequest`,
         {
           rideId: ride._id,
           captain: captain && captain,
@@ -137,7 +137,8 @@ const CaptainHome = () => {
 
       if (response.status === 200) {
         setRidePopupPanel(false);
-        setConfirmRidePopupPanel(true);
+        console.log(response.data);
+        navigate("/captain-riding", { state: { ride: response.data } });
       }
     } catch (error) {
       console.log(error);
@@ -174,24 +175,11 @@ const CaptainHome = () => {
           ref={ridePopupPanelRef}
           className="fixed w-full z-10 bottom-0 translate-y-0 bg-white px-3 py-10 pt-12 max-w-96"
         >
-          <RidePopup
+          <AcceptRidePopup
             ride={ride}
-            confirmRide={confirmRide}
+            acceptRide={acceptRide}
             setRidePopupPanel={setRidePopupPanel}
             setConfirmRidePopupPanel={setConfirmRidePopupPanel}
-          />
-        </div>
-
-        {/* ========= confirm ride pop up ======== */}
-        <div
-          ref={confirmRidePopupPanelRef}
-          className="fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white max-w-96"
-        >
-          <ConfirmRidePopUp
-            ride={ride}
-            captain={captain}
-            setConfirmRidePopupPanel={setConfirmRidePopupPanel}
-            setRidePopupPanel={setRidePopupPanel}
           />
         </div>
       </div>

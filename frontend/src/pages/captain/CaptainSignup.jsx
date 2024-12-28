@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { CaptainDataContext } from "../context/CaptainContext";
+import { CaptainDataContext } from "../../context/CaptainContext";
 
 const CaptainSignup = () => {
   const { captain, setCaptain } = useContext(CaptainDataContext);

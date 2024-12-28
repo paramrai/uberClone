@@ -1,19 +1,19 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import Start from "./pages/Start";
-import Home from "./pages/Home";
-import UserLogin from "./pages/UserLogin";
-import UserSignup from "./pages/UserSignup";
-import CaptainLogin from "./pages/CaptainLogin";
-import CaptainSignup from "./pages/CaptainSignup";
-import UserProtectWrapper from "./pages/UserProtectWrapper";
-import UserLogout from "./pages/UserLogout";
-import CaptainLogout from "./pages/CaptainLogout";
-import CaptainHome from "./pages/CaptainHome";
 import "remixicon/fonts/remixicon.css";
-import CaptainProtectWrappper from "./pages/CaptainProtectWrappper";
-import CaptainRiding from "./pages/CaptainRiding";
-import Riding from "./pages/Riding";
+import Start from "./pages/Start";
+import UserLogin from "./pages/user/UserLogin";
+import UserSignup from "./pages/user/UserSignup";
+import UserProtectWrapper from "./pages/user/UserProtectWrapper";
+import Home from "./pages/user/Home";
+import Riding from "./pages/user/Riding";
+import Captainlogin from "./pages/captain/CaptainLogin";
+import CaptainSignup from "./pages/captain/CaptainSignup";
+import CaptainProtectWrapper from "./pages/captain/CaptainProtectWrappper";
+import CaptainHome from "./pages/captain/CaptainHome";
+import CaptainLogout from "./pages/captain/CaptainLogout";
+import CaptainRiding from "./pages/captain/CaptainRiding";
+import UserLogout from "./pages/user/UserLogout";
 
 const App = () => {
   return (
@@ -43,22 +43,22 @@ const App = () => {
         <Route path="/riding" element={<Riding />} />
 
         {/* captain routes  */}
-        <Route path="/captain-login" element={<CaptainLogin />} />
+        <Route path="/captain-login" element={<Captainlogin />} />
         <Route path="/captain-signup" element={<CaptainSignup />} />
         <Route
           path="/captain-home"
           element={
-            <CaptainProtectWrappper>
+            <CaptainProtectWrapper>
               <CaptainHome />
-            </CaptainProtectWrappper>
+            </CaptainProtectWrapper>
           }
         />
         <Route
           path="/captain-logout"
           element={
-            <CaptainProtectWrappper>
+            <CaptainProtectWrapper>
               <CaptainLogout />
-            </CaptainProtectWrappper>
+            </CaptainProtectWrapper>
           }
         />
 

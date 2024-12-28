@@ -13,9 +13,13 @@ export const SocketContext = createContext();
 
 const SocketProvider = ({ children }) => {
   useEffect(() => {
-    socket.on("connect", () => {});
+    socket.on("connect", () => {
+      console.log("Connected to the server");
+    });
 
-    socket.on("disconnect", () => {});
+    socket.on("disconnect", () => {
+      console.log("Disconnected from the server");
+    });
 
     socket.on("error", (error) => {
       console.error("Socket error:", error);
