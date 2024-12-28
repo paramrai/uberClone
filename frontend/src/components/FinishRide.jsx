@@ -1,14 +1,23 @@
 import axios from "axios";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { CaptainDataContext } from "../context/CaptainContext";
 const FinishRide = (props) => {
   const navigate = useNavigate();
+  const { captain } = useContext(CaptainDataContext);
+
+  useEffect(() => {
+    console.log(props.ride?._id);
+    console.log(props.ride);
+    console.log(captain);
+  }, []);
 
   async function endRide() {
     const response = await axios.post(
       `${import.meta.env.VITE_BASE_URL}/rides/end-ride`,
       {
-        rideId: props.rideId,
+        rideId: props.ride?._id,
+        captain,
       },
       {
         headers: {

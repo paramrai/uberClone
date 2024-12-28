@@ -31,6 +31,7 @@ function initializeSocket(server) {
           socket.emit("join-success", {
             user: { ...user, socketId: socket.id },
           });
+          console.log(`User is Connnected to ${socket.id}`);
         } else if (userType === "captain") {
           const captain = await captainModel
             .findByIdAndUpdate(
@@ -46,6 +47,7 @@ function initializeSocket(server) {
           socket.emit("join-success", {
             captain: { ...captain, socketId: socket.id },
           });
+          console.log(`Captain is Connnected to ${socket.id}`);
         }
       } catch (error) {
         console.error("Error in join event:", error);
@@ -59,14 +61,21 @@ function initializeSocket(server) {
       // Remove socketId on disconnect
       try {
         await Promise.all([
-          userModel.updateOne({ socketId: socket.id }, { socketId: null }),
-          captainModel.updateOne({ socketId: socket.id }, { socketId: null }),
+          userModel.updateOne(
+            { socketId: socket.id },
+            { socketId: null, isOnline: false }
+          ),
+          captainModel.updateOne(
+            { socketId: socket.id },
+            { socketId: null, status: "inactive" }
+          ),
         ]);
       } catch (error) {
         console.error("Error in disconnect:", error);
       }
     });
 
+    // update captain location
     socket.on("update-captain-location", async (data) => {
       try {
         const { userId, location } = data;
@@ -77,6 +86,7 @@ function initializeSocket(server) {
         await captainModel.findByIdAndUpdate(userId, {
           location: { lng: location.lng, ltd: location.ltd },
         });
+        console.log(`Captain location updated for ${socket.id}`);
       } catch (error) {
         console.error("Error updating location:", error);
         socket.emit("error", { message: "Failed to update location" });

@@ -89,7 +89,6 @@ module.exports.createRide = async ({
 
 module.exports.confirmRide = async ({ rideId, captain }) => {
   if (!rideId) throw new Error("rideId is required");
-
   const acceptedRide = await rideModel
     .findByIdAndUpdate(
       {
@@ -108,7 +107,7 @@ module.exports.confirmRide = async ({ rideId, captain }) => {
     .select("+otp");
 
   if (!acceptedRide) throw new Error("No such ride");
-
+  acceptedRide && console.log("Ride is accepted by captain");
   return acceptedRide;
 };
 
@@ -135,30 +134,31 @@ module.exports.startRide = async ({ rideId, otp, captain }) => {
       },
       { new: true }
     )
-    .populate("user");
+    .populate("user")
+    .populate("captain");
+
+  onGoingRide && console.log("Ride is started by captain");
 
   return onGoingRide;
 };
 
 module.exports.endRide = async ({ rideId, captain }) => {
   if (!rideId) throw new Error("Ride id is required");
-
   const ride = await rideModel
     .findOne({
       _id: rideId,
       captain: captain._id,
     })
     .populate("user")
-    .populate("captain")
-    .select("+otp");
+    .populate("captain");
 
   if (!ride) throw new Error("No such ride found");
 
   if (ride.status !== "ongoing") {
-    throw new Error("Ride not ongoing");
+    throw new Error("Ride is not ongoing");
   }
 
-  await rideModel.findByIdAndUpdate(
+  const completedRide = await rideModel.findByIdAndUpdate(
     {
       _id: rideId,
     },
@@ -166,6 +166,8 @@ module.exports.endRide = async ({ rideId, captain }) => {
       status: "completed",
     }
   );
+
+  console.log("Ride is completed", { completedRide });
 
   return ride;
 };
