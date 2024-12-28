@@ -25,7 +25,7 @@ const initCenter = {
 const LiveTracking = ({ pickupAddress, destinationAddress }) => {
   const [currentPosition, setCurrentPosition] = useState(initCenter);
   const [directions, setDirections] = useState(null);
-  const [walkingDirections, setWalkingDirections] = useState(null);
+  const [secondDirections, setSecondDirections] = useState(null);
   const [heading, setHeading] = useState(null);
   const [map, setMap] = useState(null);
   const [zoom, setZoom] = useState(13);
@@ -160,7 +160,7 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
           },
           (result, status) => {
             if (status === window.google.maps.DirectionsStatus.OK) {
-              setWalkingDirections(result);
+              setSecondDirections(result);
             } else {
               console.error(`Error fetching directions: ${status}`);
               setError(`Error fetching directions: ${status}`);
@@ -172,7 +172,7 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
       console.error("Error fetching directions:", error);
       setError("Error fetching directions");
       setDirections(null);
-      setWalkingDirections(null);
+      setSecondDirections(null);
     } finally {
       setLoading(false);
     }
@@ -375,9 +375,9 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
           />
         )}
 
-        {walkingDirections && (
+        {secondDirections && (
           <DirectionsRenderer
-            directions={walkingDirections}
+            directions={secondDirections}
             options={{
               suppressMarkers: true,
               preserveViewport: true,
@@ -408,42 +408,48 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
           </div>
         )}
 
-        <ButtonToolbar
-          className="absolute bottom-[30%] right-[10px] bg-white rounded-sm shadow-sm z-50 "
-          aria-label="Toolbar with button groups"
-        >
-          <ButtonGroup className="flex flex-col" aria-label="Travel mode group">
-            <Button
-              onClick={() => handleTravelModeChange("DRIVING")}
-              className={`${
-                travelMode === "DRIVING"
-                  ? "border bottom-1 border-gray-500 border-collapse"
-                  : ""
-              } px-3 py-2 text-sm font-medium h-10 w-10 transition-all ease-in-out`}
+        {location === "/captain-home" ||
+          (location === "/captain-riding" && (
+            <ButtonToolbar
+              className="absolute bottom-[30%] right-[10px] bg-white rounded-sm shadow-sm z-50 "
+              aria-label="Toolbar with button groups"
             >
-              {loading && travelMode === "DRIVING" ? (
-                <Spinner animation="border" size="sm" />
-              ) : (
-                "🚗"
-              )}
-            </Button>
-            <Button
-              variant={travelMode === "BICYCLING" ? "primary" : "light"}
-              onClick={() => handleTravelModeChange("BICYCLING")}
-              className={`${
-                travelMode === "BICYCLING"
-                  ? "border bottom-1 border-gray-500 border-collapse"
-                  : ""
-              } px-3 py-2 text-sm font-medium h-10 w-10 transition-all ease-in-out`}
-            >
-              {loading && travelMode === "BICYCLING" ? (
-                <Spinner animation="border" size="sm" />
-              ) : (
-                "🚲"
-              )}
-            </Button>
-          </ButtonGroup>
-        </ButtonToolbar>
+              <ButtonGroup
+                className="flex flex-col"
+                aria-label="Travel mode group"
+              >
+                <Button
+                  onClick={() => handleTravelModeChange("DRIVING")}
+                  className={`${
+                    travelMode === "DRIVING"
+                      ? "border bottom-1 border-gray-500 border-collapse"
+                      : ""
+                  } px-3 py-2 text-sm font-medium h-10 w-10 transition-all ease-in-out`}
+                >
+                  {loading && travelMode === "DRIVING" ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    "🚗"
+                  )}
+                </Button>
+                <Button
+                  variant={travelMode === "BICYCLING" ? "primary" : "light"}
+                  onClick={() => handleTravelModeChange("BICYCLING")}
+                  className={`${
+                    travelMode === "BICYCLING"
+                      ? "border bottom-1 border-gray-500 border-collapse"
+                      : ""
+                  } px-3 py-2 text-sm font-medium h-10 w-10 transition-all ease-in-out`}
+                >
+                  {loading && travelMode === "BICYCLING" ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    "🚲"
+                  )}
+                </Button>
+              </ButtonGroup>
+            </ButtonToolbar>
+          ))}
 
         {location === "/captain-riding" && (
           <button
