@@ -9,8 +9,8 @@ const FinishRide = (props) => {
   useEffect(() => {
     console.log(props.ride?._id);
     console.log(props.ride);
-    console.log(captain);
-  }, []);
+    captain && console.log(captain);
+  }, [captain]);
 
   async function endRide() {
     const response = await axios.post(

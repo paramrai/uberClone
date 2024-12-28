@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useContext,
+} from "react";
 import {
   LoadScript,
   GoogleMap,
@@ -11,6 +17,8 @@ import pickup from "../assets/location.png";
 import destination from "../assets/locationPin.png";
 import { Button, ButtonGroup, ButtonToolbar, Spinner } from "react-bootstrap";
 import AlertBox from "./captain/AlertBox";
+import { CaptainDataContext } from "../context/CaptainContext";
+import { UserDataContext } from "../context/UserContext";
 
 const containerStyle = {
   width: "100%",
@@ -22,23 +30,36 @@ const initCenter = {
   lng: 74.750543,
 };
 
-const LiveTracking = ({ pickupAddress, destinationAddress }) => {
-  const [currentPosition, setCurrentPosition] = useState(initCenter);
-  const [directions, setDirections] = useState(null);
-  const [secondDirections, setSecondDirections] = useState(null);
-  const [heading, setHeading] = useState(null);
+const LiveTracking = ({
+  pickupAddress,
+  destinationAddress,
+  arrivedAtPickup,
+  setArrivedAtPickup,
+}) => {
+  const { captain } = useContext(CaptainDataContext);
+  const { user } = useContext(UserDataContext);
+
+  // map related
   const [map, setMap] = useState(null);
   const [zoom, setZoom] = useState(13);
-  const [center, setCenter] = useState(initCenter);
+  const [heading, setHeading] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [travelMode, setTravelMode] = useState("DRIVING");
+
+  const [isDriveMode, setIsDriveMode] = useState(false);
+  const isManualControl = useRef(false);
+
+  // postion related
+  const [currentPosition, setCurrentPosition] = useState(initCenter);
+  const [pickupDirections, setPickupDirections] = useState(null);
+  const [destinationDirections, setDestinationDirections] = useState(null);
   const [pickupCoords, setPickupCoords] = useState(null);
   const [destinationCoords, setDestinationCoords] = useState(null);
-  const [travelMode, setTravelMode] = useState("DRIVING");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
   const [lastKnownPosition, setLastKnownPosition] = useState(null);
   const watchPositionId = useRef(null);
+
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // refs
   const geometryLoaded = useRef(false);
@@ -117,66 +138,31 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
     }
   }, []);
 
-  // fetching direction
-  const fetchDirections = useCallback(async () => {
-    if (!directionsServiceRef.current || !pickupCoords || !currentPosition) {
-      console.log("Direction service or positions not ready");
+  // get captain current location
+  const getCurrentLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      console.error("Geolocation not supported");
       return;
     }
 
     setLoading(true);
-    setError(null);
-
-    try {
-      const mode = google.maps.TravelMode[travelMode];
-
-      // fetch direction current position to pickup position
-      if (pickupCoords && currentPosition) {
-        directionsServiceRef.current.route(
-          {
-            origin: currentPosition,
-            destination: pickupCoords,
-            travelMode: mode,
-          },
-          (result, status) => {
-            if (status === google.maps.DirectionsStatus.OK) {
-              setDirections(result);
-            } else {
-              console.error(`Directions request failed: ${status}`);
-              setError(`Directions request failed: ${status}`);
-              setDirections(null);
-            }
-          }
-        );
-      }
-
-      // fetch directions through pickup to destination
-      if (pickupCoords && destinationCoords) {
-        directionsServiceRef.current.route(
-          {
-            origin: pickupCoords,
-            destination: destinationCoords,
-            travelMode: mode,
-          },
-          (result, status) => {
-            if (status === window.google.maps.DirectionsStatus.OK) {
-              setSecondDirections(result);
-            } else {
-              console.error(`Error fetching directions: ${status}`);
-              setError(`Error fetching directions: ${status}`);
-            }
-          }
-        );
-      }
-    } catch (error) {
-      console.error("Error fetching directions:", error);
-      setError("Error fetching directions");
-      setDirections(null);
-      setSecondDirections(null);
-    } finally {
+    const success = (position) => {
+      const { latitude: lat, longitude: lng } = position.coords;
+      setCurrentPosition({ lat, lng });
+      setLastKnownPosition({ lat, lng });
       setLoading(false);
-    }
-  }, [currentPosition, pickupCoords, destinationCoords, travelMode]);
+    };
+
+    const error = (error) => {
+      console.error("Error getting location:", error);
+      setLoading(false);
+    };
+    navigator.geolocation.getCurrentPosition(success, error);
+  }, []);
+
+  useEffect(() => {
+    currentPosition && getCurrentLocation();
+  }, []);
 
   const caclculateHeading = useCallback(
     (startPos, endPos) => {
@@ -204,57 +190,123 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
     [isLoaded]
   );
 
-  // get user current location
-  const getCurrentLocation = useCallback(() => {
+  //  Watch position for updating location
+  const watchPosition = useCallback(() => {
     if (!navigator.geolocation) {
-      console.error("Geolocation not supported");
+      console.error("Geolocation is not supported by this browser.");
       return;
     }
 
-    const success = (position) => {
-      const { latitude: lat, longitude: lng } = position.coords;
-      setCurrentPosition({ lat, lng });
-      setCenter({ lat, lng });
-      // setLastKnownPosition({ lat, lng });
+    console.log("Watching position");
+
+    if (isDriveMode) {
+      watchPositionId.current = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude: lat, longitude: lng, heading } = position.coords;
+          const newPosition = { lat, lng };
+
+          // Calculate heading if not provided
+          if (!heading && lastKnownPosition) {
+            const calculatedHeading = caclculateHeading(
+              lastKnownPosition,
+              newPosition
+            );
+            setHeading(calculatedHeading);
+          } else {
+            setHeading(heading || 0);
+          }
+
+          setCurrentPosition(newPosition);
+          setLastKnownPosition(newPosition);
+          if (map && isDriveMode && !isManualControl) {
+            setZoom(17);
+            map.setZoom(17);
+            map.panTo(newPosition);
+            map.setHeading(heading);
+          }
+        },
+        (error) => console.error("Error watching position:", error),
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+    } else {
+      if (watchPositionId.current) {
+        navigator.geolocation.clearWatch(watchPositionId.current);
+        watchPositionId.current = null;
+      }
+    }
+
+    return () => {
+      if (watchPositionId.current) {
+        navigator.geolocation.clearWatch(watchPositionId.current);
+        watchPositionId.current = null;
+      }
     };
+  }, [map, isDriveMode]);
 
-    const error = (error) => console.error("Error getting location:", error);
+  // fetching direction
+  const fetchDirections = useCallback(async () => {
+    if (!directionsServiceRef.current || !pickupCoords || !currentPosition) {
+      console.log("Direction service or positions not ready");
+      return;
+    }
 
-    // Get initial position
-    navigator.geolocation.getCurrentPosition(success, error);
+    setLoading(true);
+    setError(null);
 
-    // Watch position for updates
-    // watchPositionId.current = navigator.geolocation.watchPosition(
-    //   (position) => {
-    //     const { latitude: lat, longitude: lng, heading } = position.coords;
-    //     const newPosition = { lat, lng };
+    try {
+      const mode = google.maps.TravelMode[travelMode];
 
-    //     // Calculate heading if not provided
-    //     if (!heading && lastKnownPosition) {
-    //       const calculatedHeading = caclculateHeading(
-    //         lastKnownPosition,
-    //         newPosition
-    //       );
-    //       setHeading(calculatedHeading);
-    //     } else {
-    //       setHeading(heading || 0);
-    //     }
+      // fetch direction current position to pickup position
+      if (pickupCoords && currentPosition) {
+        directionsServiceRef.current.route(
+          {
+            origin: currentPosition,
+            destination: pickupCoords,
+            travelMode: mode,
+          },
+          (result, status) => {
+            if (status === google.maps.DirectionsStatus.OK) {
+              setPickupDirections(result);
+            } else {
+              console.error(`Directions request failed: ${status}`);
+              setError(`Directions request failed: ${status}`);
+              setPickupDirections(null);
+            }
+          }
+        );
+      }
 
-    //     setCurrentPosition(newPosition);
-    //     setLastKnownPosition(newPosition);
-    //     if (map) map.panTo(newPosition);
-    //   },
-    //   (error) => console.error("Error watching position:", error),
-    //   {
-    //     enableHighAccuracy: true,
-    //     timeout: 5000,
-    //     maximumAge: 0,
-    //   }
-    // );
-  }, [
-    map,
-    //  lastKnownPosition
-  ]);
+      // fetch directions through pickup to destination
+      if (pickupCoords && destinationCoords) {
+        directionsServiceRef.current.route(
+          {
+            origin: pickupCoords,
+            destination: destinationCoords,
+            travelMode: mode,
+          },
+          (result, status) => {
+            if (status === window.google.maps.DirectionsStatus.OK) {
+              setDestinationDirections(result);
+            } else {
+              console.error(`Error fetching directions: ${status}`);
+              setError(`Error fetching directions: ${status}`);
+            }
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching directions:", error);
+      setError("Error fetching directions");
+      setPickupDirections(null);
+      setDestinationDirections(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPosition, pickupCoords, destinationCoords, travelMode]);
 
   // Add useEffect for cleanup
   useEffect(() => {
@@ -271,7 +323,7 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
         navigator.geolocation.clearWatch(watchPositionId.current);
       }
     };
-  }, [getCurrentLocation, currentPosition, pickupCoords, destinationCoords]);
+  }, [currentPosition, pickupCoords, destinationCoords]);
 
   // handle on loaded map
   const handleLoad = useCallback(
@@ -292,18 +344,77 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
     [currentPosition, fetchDirections, pickupCoords, destinationCoords]
   );
 
-  // handle drive Mode
-  // todo watch position
-  // todo on drive mode on watch position
-  // todo on map changes stop watch position
-  // todo then add a recenter butn to go into driving mode again
-  const handleDriveMode = () => {
-    if (map) {
-      map.setZoom(17);
-      map.setHeading(heading);
-      map.panTo(currentPosition);
-    }
+  // Add debounce utility
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
   };
+
+  // drive mode effect
+  useEffect(() => {
+    console.log("Drive mode effect running", { isDriveMode, map });
+
+    if (isDriveMode && !map && !isManualControl.current) return;
+
+    let isMounted = true;
+
+    const debouncedUpdateMap = debounce(() => {
+      if (!isMounted) return;
+      map && map.setZoom(17);
+      map && map.panTo(currentPosition);
+      map && map.setHeading(heading);
+    }, 100);
+
+    // Initial update
+    debouncedUpdateMap();
+
+    if (map && window.google && window.google.maps) {
+      const zoomListener = map.addListener("zoom_changed", () => {
+        if (isDriveMode && !isManualControl.current) {
+          debouncedUpdateMap();
+        }
+      });
+
+      const centerListener = map.addListener("center_changed", () => {
+        if (isDriveMode && !isManualControl.current) {
+          debouncedUpdateMap();
+        }
+      });
+
+      return () => {
+        if (map && window.google && google.maps && google.maps.event) {
+          isMounted = false;
+          google.maps.event.removeListener(zoomListener);
+          google.maps.event.removeListener(centerListener);
+        }
+      };
+    }
+  }, [isDriveMode, map, currentPosition, heading, isManualControl]);
+
+  const handleDriveMode = useCallback(() => {
+    setIsDriveMode(true);
+    isManualControl.current = false;
+
+    if (!watchPositionId.current) {
+      watchPosition();
+    }
+  }, [watchPosition]);
+
+  // add map event listeners
+  const handleMapDrag = useCallback(() => {
+    setIsDriveMode(false);
+    isManualControl.current = true;
+    console.log(
+      "map is dragged",
+      "isDriveMode",
+      isDriveMode,
+      "isManualControl",
+      isManualControl
+    );
+  }, [watchPosition]);
 
   const handleTravelModeChange = useCallback(
     (mode) => {
@@ -315,6 +426,8 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
     [currentPosition, pickupCoords, destinationCoords]
   );
 
+  if (loading) return <div>loading...</div>;
+
   return (
     <LoadScript
       googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
@@ -323,77 +436,87 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
       <GoogleMap
         mapContainerStyle={containerStyle}
         libraries={["geometry", "places", "visualization", "drawing"]}
-        center={center}
+        center={currentPosition}
         zoom={zoom}
         onLoad={handleLoad}
-        options={{ streetViewControl: false }}
+        onDragStart={handleMapDrag}
+        onZoomChanged={handleMapDrag}
+        options={{
+          gestureHandling: "greedy",
+          zoomControl: !isDriveMode,
+          streetViewControl: false,
+        }}
       >
-        {currentPosition && (
-          <Marker
-            position={currentPosition}
-            icon={{
-              url: current,
-              scaledSize: map && new window.google.maps.Size(70, 70),
-              anchor: map && new window.google.maps.Point(50, 75),
-            }}
-          />
-        )}
+        {captain &&
+          currentPosition &&
+          map &&
+          window.google &&
+          window.google.maps && (
+            <Marker
+              position={currentPosition}
+              icon={{
+                url: current,
+                scaledSize: new window.google.maps.Size(70, 70),
+                anchor: new window.google.maps.Point(50, 75),
+              }}
+            />
+          )}
 
-        {pickupCoords && (
+        {user.email &&
+          currentPosition &&
+          map &&
+          window.google &&
+          window.google.maps && (
+            <Marker
+              position={currentPosition}
+              icon={{
+                url: pickup,
+                scaledSize: new window.google.maps.Size(50, 50),
+                anchor: new window.google.maps.Point(25, 50),
+              }}
+            />
+          )}
+
+        {pickupCoords && map && window.google && window.google.maps && (
           <Marker
             position={pickupCoords}
             icon={{
               url: pickup,
-              scaledSize: map && new window.google.maps.Size(50, 50),
-              anchor: map && new window.google.maps.Point(25, 50),
+              scaledSize: new window.google.maps.Size(50, 50),
+              anchor: new window.google.maps.Point(25, 50),
             }}
           />
         )}
 
-        {destinationCoords && (
+        {destinationCoords && map && window.google && window.google.maps && (
           <Marker
             position={destinationCoords}
             icon={{
               url: destination,
-              scaledSize: map && new window.google.maps.Size(50, 50),
-              anchor: map && new window.google.maps.Point(25, 50),
+              scaledSize: new window.google.maps.Size(50, 50),
+              anchor: new window.google.maps.Point(25, 50),
             }}
           />
         )}
-        {directions && (
+        {!arrivedAtPickup && pickupDirections && (
           <DirectionsRenderer
-            directions={directions}
             options={{
               suppressMarkers: true,
-              preserveViewport: true,
-              polylineOptions: {
-                strokeColor: "#2666CF",
-                strokeOpacity: 0.8,
-                strokeWeight: 4,
-              },
             }}
+            directions={pickupDirections}
           />
         )}
-
-        {secondDirections && (
+        {arrivedAtPickup && destinationDirections && (
           <DirectionsRenderer
-            directions={secondDirections}
             options={{
-              suppressMarkers: true,
-              preserveViewport: true,
               polylineOptions: {
-                strokeColor: "#000000",
-                strokeOpacity: 1.0,
-                strokeWeight: 4,
-                icons: [
-                  {
-                    icon: { path: "M 0,-1 0,1", strokeOpacity: 1, scale: 4 },
-                    offset: "0",
-                    repeat: "20px",
-                  },
-                ],
+                strokeColor: "rgb(29 99 161)",
+                strokeWeight: 5,
+                strokeOpacity: 0.7,
               },
+              suppressMarkers: true,
             }}
+            directions={destinationDirections}
           />
         )}
 
@@ -426,11 +549,7 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
                       : ""
                   } px-3 py-2 text-sm font-medium h-10 w-10 transition-all ease-in-out`}
                 >
-                  {loading && travelMode === "DRIVING" ? (
-                    <Spinner animation="border" size="sm" />
-                  ) : (
-                    "🚗"
-                  )}
+                  🚗
                 </Button>
                 <Button
                   variant={travelMode === "BICYCLING" ? "primary" : "light"}
@@ -441,17 +560,13 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
                       : ""
                   } px-3 py-2 text-sm font-medium h-10 w-10 transition-all ease-in-out`}
                 >
-                  {loading && travelMode === "BICYCLING" ? (
-                    <Spinner animation="border" size="sm" />
-                  ) : (
-                    "🚲"
-                  )}
+                  🚲
                 </Button>
               </ButtonGroup>
             </ButtonToolbar>
           ))}
 
-        {location === "/captain-riding" && (
+        {arrivedAtPickup && location === "/captain-riding" && (
           <button
             onClick={handleDriveMode}
             className="bg-white font-semibold no-b rounded-sm shadow-2xl py-2 px-4 w-[35%] absolute left-[50%] translate-x-[-50%]  bottom-4 mx-auto inline-block"
@@ -460,15 +575,23 @@ const LiveTracking = ({ pickupAddress, destinationAddress }) => {
           </button>
         )}
 
-        {location === "/home" ||
-          (location === "/captain-home" && (
-            <button
-              onClick={handleDriveMode}
-              className="bg-white font-semibold rounded-sm shadow-2xl py-2 px-4 w-[35%] absolute left-[50%] translate-x-[-50%]  bottom-4 mx-auto inline-block"
-            >
-              Recenter
-            </button>
-          ))}
+        {!arrivedAtPickup && location === "/captain-riding" && (
+          <button
+            onClick={handleDriveMode}
+            className="bg-white font-semibold no-b rounded-sm shadow-2xl py-2 px-4 w-[35%] absolute left-[50%] translate-x-[-50%]  bottom-4 mx-auto inline-block"
+          >
+            Navigate
+          </button>
+        )}
+
+        {(location === "/home" || location === "/captain-home") && (
+          <button
+            onClick={handleDriveMode}
+            className="bg-white font-semibold rounded-sm shadow-2xl py-2 px-4 w-[35%] absolute left-[50%] translate-x-[-50%]  bottom-4 mx-auto inline-block"
+          >
+            Recenter
+          </button>
+        )}
       </GoogleMap>
     </LoadScript>
   );

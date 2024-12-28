@@ -1,14 +1,16 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CaptainDataContext } from "../../context/CaptainContext";
 
-const ConfirmRidePopUp = (props) => {
+const EnterOtpPopUp = (props) => {
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
-  const { captain } = props;
+  const captain = useContext(CaptainDataContext);
 
   const submitHander = async (e) => {
     e.preventDefault();
+    console.log("otpEnter", captain && captain);
 
     if (!otp || otp.length !== 6) {
       alert("Please enter a valid OTP");
@@ -32,9 +34,11 @@ const ConfirmRidePopUp = (props) => {
       );
 
       if (response.status === 200) {
-        props.setConfirmRidePopupPanel(false);
-        props.setRidePopupPanel(false);
-        navigate("/captain-riding", { state: { ride: props.ride } });
+        // start riding
+        // set captain reached at pickup
+        props.setArrivedAtPickup(true);
+        props.setEnterOtpPopupPanel(false);
+        console.log("Captain started driving");
       }
     } catch (error) {
       alert("Invalid Otp");
@@ -46,12 +50,14 @@ const ConfirmRidePopUp = (props) => {
       <h5
         className="p-1 text-center absolute top-0 right-5 cursor-pointer"
         onClick={() => {
-          props.setConfirmRidePopupPanel(false);
+          props.setEnterOtpPopupPanel(false);
         }}
       >
         <i className="text-3xl text-gray-200 ri-arrow-down-wide-line"></i>
       </h5>
-      <h3 className="text-xl font-semibold mt-2">Confirm this ride to Start</h3>
+      <h3 className="text-xl font-semibold mt-2">
+        Enter Otp to Start this ride
+      </h3>
       <div className="flex items-center justify-between p-3 border-2 border-yellow-400 rounded-lg mt-2">
         <div className="flex items-center gap-3 ">
           <img
@@ -114,35 +120,21 @@ const ConfirmRidePopUp = (props) => {
               type="submit"
               className="w-full mt-5 text-lg flex justify-center bg-green-600 text-white font-semibold p-3 rounded-lg"
             >
-              Confirm
-            </button>
-            <button
-              onClick={() => {
-                props.setConfirmRidePopupPanel(false);
-                props.setRidePopupPanel(false);
-              }}
-              className="w-full mt-2 bg-red-600 text-lg text-white font-semibold p-3 rounded-lg"
-            >
-              Cancel
+              Start Ride
             </button>
           </form>
+          <button
+            onClick={() => {
+              props.setEnterOtpPopupPanel(false);
+            }}
+            className="w-full mt-2 bg-red-600 text-lg text-white font-semibold p-3 rounded-lg"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default ConfirmRidePopUp;
-
-//   {/* ========= confirm ride pop up ======== */}
-//   <div
-//   ref={confirmRidePopupPanelRef}
-//   className="fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white max-w-96"
-// >
-//   <ConfirmRidePopUp
-//     ride={ride}
-//     captain={captain}
-//     setConfirmRidePopupPanel={setConfirmRidePopupPanel}
-//     setRidePopupPanel={setRidePopupPanel}
-//   />
-// </div>
+export default EnterOtpPopUp;

@@ -62,7 +62,14 @@ const App = () => {
           }
         />
 
-        <Route path="/captain-riding" element={<CaptainRiding />} />
+        <Route
+          path="/captain-riding"
+          element={
+            <CaptainProtectWrapper>
+              <CaptainRiding />
+            </CaptainProtectWrapper>
+          }
+        />
       </Routes>
     </>
   );

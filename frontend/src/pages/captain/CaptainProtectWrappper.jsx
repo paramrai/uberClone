@@ -29,9 +29,7 @@ const CaptainProtectWrapper = ({ children }) => {
 
         if (response.status === 200) {
           setCaptain(response.data.captain);
-          if (location.pathname !== "/captain-home") {
-            navigate("/captain-home");
-          }
+          navigate(location.pathname);
         }
       } catch (error) {
         console.error(error);
