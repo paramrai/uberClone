@@ -14,6 +14,7 @@ import CaptainHome from "./pages/captain/CaptainHome";
 import CaptainLogout from "./pages/captain/CaptainLogout";
 import CaptainRiding from "./pages/captain/CaptainRiding";
 import UserLogout from "./pages/user/UserLogout";
+import "./App.css";
 
 const App = () => {
   return (

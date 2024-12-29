@@ -11,6 +11,7 @@ import { UserDataContext } from "../../context/UserContext";
 import { SocketContext } from "../../context/SocketContext";
 import { useNavigate } from "react-router-dom";
 import LiveTracking from "../../components/LiveTracking";
+import ShowAlert from "../../components/ShowAlert";
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -29,6 +30,7 @@ const Home = () => {
   const [fare, setFare] = useState("");
   const [ride, setRide] = useState(null);
   const [error, setError] = useState(null);
+  const [showAlert, setShowAlert] = useState(false);
 
   // refs
   const panelRef = useRef(null);
@@ -63,10 +65,14 @@ const Home = () => {
 
   useEffect(() => {
     if (error) {
-      // false the error after 7 seconds
-      setTimeout(() => setError(null), 7000);
+      setShowAlert(true);
     }
-  });
+  }, [error]);
+
+  const dismissAlert = () => {
+    setShowAlert(false);
+    setError(null);
+  };
 
   socket.on("ride-accepted", (acceptedRide) => {
     console.log("Ride accepted: ", acceptedRide);
@@ -79,116 +85,6 @@ const Home = () => {
     setWaitingForDriver(false);
     navigate("/riding", { state: { ride } });
   });
-
-  useGSAP(
-    function () {
-      if (panelOpen) {
-        gsap.to(panelRef.current, {
-          height: "70%",
-          padding: "24px",
-          overflow: "scroll",
-          scrollbarWidth: "0",
-          scrollbarColor: "transparent transparent",
-        });
-        gsap.to(panelCloseRef.current, {
-          opacity: 1,
-        });
-        gsap.to(vehiclePanelRef.current, {
-          opacity: 0,
-        });
-        gsap.to(liveTrackingRef.current, {
-          height: 0,
-        });
-      } else {
-        gsap.to(panelRef.current, {
-          height: 0,
-          padding: 0,
-        });
-        gsap.to(panelCloseRef.current, {
-          opacity: 0,
-        });
-        gsap.to(vehiclePanelRef.current, {
-          opacity: 1,
-        });
-        gsap.to(liveTrackingRef.current, {
-          height: "100%",
-        });
-      }
-    },
-    [panelOpen]
-  );
-
-  useGSAP(
-    function () {
-      if (vehiclePanel) {
-        gsap.to(vehiclePanelRef.current, {
-          transform: "translateY(0)",
-        });
-      } else {
-        gsap.to(vehiclePanelRef.current, {
-          transform: "translateY(100%)",
-        });
-      }
-    },
-    [vehiclePanel]
-  );
-
-  useGSAP(
-    function () {
-      if (confirmRidePanel) {
-        gsap.to(confirmRidePanelRef.current, {
-          transform: "translateY(0)",
-        });
-        gsap.to(waitingForDriverRef, {
-          opacity: 0,
-        });
-      } else {
-        gsap.to(confirmRidePanelRef.current, {
-          transform: "translateY(100%)",
-        });
-        gsap.to(waitingForDriverRef, {
-          opacity: 1,
-        });
-      }
-    },
-    [confirmRidePanel]
-  );
-
-  useGSAP(
-    function () {
-      if (vehicleFound) {
-        gsap.to(vehicleFoundRef.current, {
-          transform: "translateY(0)",
-        });
-        gsap.to(waitingForDriverRef.current, {
-          opacity: 0,
-        });
-      } else {
-        gsap.to(vehicleFoundRef.current, {
-          transform: "translateY(100%)",
-        });
-        gsap.to(waitingForDriverRef.current, {
-          opacity: 1,
-        });
-      }
-    },
-    [vehicleFound]
-  );
-
-  useGSAP(
-    function () {
-      if (waitingForDriver) {
-        gsap.to(waitingForDriverRef.current, {
-          transform: "translateY(0%)",
-        });
-      } else {
-        gsap.to(waitingForDriverRef.current, {
-          transform: "translateY(100%)",
-        });
-      }
-    },
-    [waitingForDriver]
-  );
 
   const handlePickupChange = async (e) => {
     setPickup(e.target.value);
@@ -280,7 +176,6 @@ const Home = () => {
       if (response.status === 200) {
         setFare(response.data);
         setVehiclePanel(true);
-        setPanelOpen(false);
       }
     } catch (error) {
       if (
@@ -330,13 +225,111 @@ const Home = () => {
     }
   };
 
+  useGSAP(
+    function () {
+      if (panelOpen) {
+        gsap.to(panelRef.current, {
+          height: "100%",
+        });
+        gsap.to(panelCloseRef.current, {
+          opacity: 1,
+        });
+        gsap.to(liveTrackingRef.current, {
+          opacity: 0,
+          height: "0%",
+        });
+      } else {
+        gsap.to(panelRef.current, {
+          height: "0%",
+        });
+        gsap.to(panelCloseRef.current, {
+          opacity: 0,
+        });
+        gsap.to(liveTrackingRef.current, {
+          opacity: 1,
+          height: "80%",
+        });
+      }
+    },
+    [panelOpen]
+  );
+
+  useGSAP(
+    function () {
+      if (vehiclePanel) {
+        gsap.to(vehiclePanelRef.current, {
+          display: "block",
+          transform: "translateY(0)",
+        });
+      } else {
+        gsap.to(vehiclePanelRef.current, {
+          display: "none",
+          transform: "translateY(100%)",
+        });
+      }
+    },
+    [vehiclePanel]
+  );
+
+  useGSAP(
+    function () {
+      if (confirmRidePanel) {
+        gsap.to(confirmRidePanelRef.current, {
+          display: "block",
+          transform: "translateY(0)",
+        });
+      } else {
+        gsap.to(confirmRidePanelRef.current, {
+          display: "none",
+          transform: "translateY(200%)",
+        });
+      }
+    },
+    [confirmRidePanel]
+  );
+
+  useGSAP(
+    function () {
+      if (vehicleFound) {
+        gsap.to(vehicleFoundRef.current, {
+          display: "block",
+          transform: "translateY(0)",
+        });
+      } else {
+        gsap.to(vehicleFoundRef.current, {
+          display: "none",
+          transform: "translateY(300%)",
+        });
+      }
+    },
+    [vehicleFound]
+  );
+
+  useGSAP(
+    function () {
+      if (waitingForDriver) {
+        gsap.to(waitingForDriverRef.current, {
+          display: "block",
+          transform: "translateY(0)",
+        });
+      } else {
+        gsap.to(waitingForDriverRef.current, {
+          display: "none",
+          transform: "translateY(400%)",
+        });
+      }
+    },
+    [waitingForDriver]
+  );
+
   return (
-    <div className="relative w-screen h-screen overflow-hidden max-w-96 mx-auto">
-      <div className=" flex flex-col justify-end h-screen absolute top-0 w-full">
-        <div className="h-[70%]" ref={liveTrackingRef}>
+    <div className="relative w-screen h-screen overflow-x-hidden">
+      {showAlert && <ShowAlert error={error} dismissAlert={dismissAlert} />}
+      <div className="flex flex-col justify-end items-center h-screen absolute top-0 w-full">
+        <div className="h-[80%] w-full" ref={liveTrackingRef}>
           <LiveTracking />
         </div>
-        <div className="h-[30%] p-3 bg-white relative">
+        <div className="h-[20%] w-full p-3 bg-white relative">
           <h5
             ref={panelCloseRef}
             onClick={() => {
@@ -347,14 +340,14 @@ const Home = () => {
             <i className="ri-arrow-down-wide-line"></i>
           </h5>
 
-          <h4 className="text-2xl font-semibold">Find a trip</h4>
+          <h4 className="text-2xl font-semibold p-2">Find a trip</h4>
           <form
-            className="relative py-2 bg-white"
+            className="relative px-2 bg-white w-full"
             onSubmit={(e) => {
               submitHandler(e);
             }}
           >
-            <div className="line absolute h-16 w-1 top-[35%] left-5 bg-gray-700 rounded-full"></div>
+            <div className="line absolute h-16 w-1 top-[35%] left-10 bg-gray-700 rounded-full"></div>
             <input
               onClick={() => {
                 setPanelOpen(true);
@@ -379,12 +372,7 @@ const Home = () => {
             />
           </form>
 
-          {error && (
-            <span className="text-red-500 bg-white inline-block w-full text-left">
-              {error}
-            </span>
-          )}
-          <div className="bg-white">
+          <div className="bg-white pt-2">
             <button
               onClick={findTrip}
               className="bg-black text-white px-4 py-2 rounded-lg mt-3 w-full"
@@ -395,7 +383,7 @@ const Home = () => {
         </div>
 
         {/* LocationSearchPanel */}
-        <div ref={panelRef} className="bg-white h-0 pt-20">
+        <div ref={panelRef} className="h-0 pt-20 overflow-y-auto w-full">
           <LocationSearchPanel
             suggestions={
               activeField === "pickup"
@@ -414,7 +402,7 @@ const Home = () => {
       {/* Vehicle Panel */}
       <div
         ref={vehiclePanelRef}
-        className="fixed w-96 mx-auto z-11 bottom-0 bg-white translate-y-full  px-3 py-10 pt-12"
+        className="fixed w-full h-screen z-11 bottom-0 bg-white translate-y-[100%]  px-3 py-10 pt-12 overflow-y-auto"
       >
         <VehiclePanel
           time={ride?.duration?.text}
@@ -428,7 +416,7 @@ const Home = () => {
       {/* Confirm Ride modal */}
       <div
         ref={confirmRidePanelRef}
-        className="fixed w-96 mx-auto z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12"
+        className="fixed w-full h-screen z-10 bottom-0 translate-y-[200%] bg-white px-3 py-6 pt-12 overflow-y-auto"
       >
         <ConfirmRide
           createRide={createRide}
@@ -444,7 +432,7 @@ const Home = () => {
       {/* Looking for driver modal */}
       <div
         ref={vehicleFoundRef}
-        className="fixed w-96 mx-auto z-9 bottom-0 translate-y-full bg-white px-3 py-6 pt-12"
+        className="fixed w-full h-screen z-9 bottom-0 translate-y-[300%] bg-white px-3 py-6 pt-12 overflow-y-auto"
       >
         <LookingForDriver
           createRide={createRide}
@@ -459,7 +447,7 @@ const Home = () => {
       {/* Waiting for driver modal */}
       <div
         ref={waitingForDriverRef}
-        className="fixed w-96 mx-auto z-8 bottom-0 translate-y-full px-3 py-6 bg-white"
+        className="fixed w-full h-screen z-8 bottom-0 translate-y-[400%] px-3 py-6 bg-white overflow-y-auto"
       >
         <WaitingForDriver
           ride={ride}

@@ -16,7 +16,7 @@ const VehiclePanel = (props) => {
           props.setConfirmRidePanel(true);
           props.selectVehicle("car");
         }}
-        className="flex border-2 active:border-black  mb-2 rounded-xl w-full p-3  items-center justify-between"
+        className="flex flex-wrap gap-4 border-2 active:border-black  mb-2 rounded-xl w-full p-3  items-center justify-between"
       >
         <img
           className="h-10"
@@ -42,7 +42,7 @@ const VehiclePanel = (props) => {
           props.setConfirmRidePanel(true);
           props.selectVehicle("moto");
         }}
-        className="flex border-2 active:border-black mb-2 rounded-xl w-full p-3  items-center justify-between"
+        className="flex flex-wrap gap-4 border-2 active:border-black mb-2 rounded-xl w-full p-3  items-center justify-between"
       >
         <img
           className="h-10"
@@ -69,7 +69,7 @@ const VehiclePanel = (props) => {
           props.setVehiclePanel(false);
           props.selectVehicle("auto");
         }}
-        className="flex border-2 active:border-black mb-2 rounded-xl w-full p-3  items-center justify-between"
+        className="flex flex-wrap gap-4 border-2 active:border-black mb-2 rounded-xl w-full p-3  items-center justify-between"
       >
         <img
           className="h-10"

@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserDataContext } from "../../context/UserContext";
+import ShowAlert from "../../components/ShowAlert";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
@@ -9,13 +10,6 @@ const UserLogin = () => {
   const { user, setUser } = useContext(UserDataContext);
   const navigate = useNavigate();
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (error) {
-      // false the error after 7 seconds
-      setTimeout(() => setError(null), 10000);
-    }
-  });
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -43,8 +37,14 @@ const UserLogin = () => {
     }
   };
 
+  const dismissAlert = () => {
+    setError(null);
+  };
+
   return (
-    <div className="max-w-96 mx-auto">
+    <div className="relative">
+      {error && <ShowAlert error={error} dismissAlert={dismissAlert} />}
+
       <div className="p-7 h-screen flex flex-col justify-between">
         <div>
           <img
@@ -76,11 +76,7 @@ const UserLogin = () => {
               type="password"
               placeholder="password"
             />
-            {error && (
-              <span className="text-red-500 bg-white inline-block w-full text-left py-1">
-                {error}
-              </span>
-            )}
+
             <button className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base">
               Login
             </button>

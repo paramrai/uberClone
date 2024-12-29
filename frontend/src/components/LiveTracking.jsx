@@ -521,7 +521,7 @@ const LiveTracking = ({
         )}
 
         {error && (
-          <div className="max-w-96 mx-auto">
+          <div className="">
             <AlertBox
               error={error}
               travelMode={travelMode}
@@ -534,7 +534,7 @@ const LiveTracking = ({
         {location === "/captain-home" ||
           (location === "/captain-riding" && (
             <ButtonToolbar
-              className="absolute bottom-[30%] right-[10px] bg-white rounded-sm shadow-sm z-50 "
+              className="absolute bottom-[30%] right-[10px] bg-white rounded-sm shadow-sm z-5 hidden xxs:block "
               aria-label="Toolbar with button groups"
             >
               <ButtonGroup

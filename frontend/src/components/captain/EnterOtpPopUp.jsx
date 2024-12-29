@@ -8,12 +8,14 @@ const EnterOtpPopUp = (props) => {
   const navigate = useNavigate();
   const captain = useContext(CaptainDataContext);
 
+  const [error, setError] = useState(null);
+
   const submitHander = async (e) => {
     e.preventDefault();
     console.log("otpEnter", captain && captain);
 
     if (!otp || otp.length !== 6) {
-      alert("Please enter a valid OTP");
+      setError("Please enter a valid OTP");
       return;
     }
 
@@ -39,27 +41,29 @@ const EnterOtpPopUp = (props) => {
         props.setArrivedAtPickup(true);
         props.setEnterOtpPopupPanel(false);
         console.log("Captain started driving");
+        setError(null);
       }
     } catch (error) {
-      alert("Invalid Otp");
+      setError("Invalid Otp");
     }
   };
 
   return (
-    <div>
+    <div className="relative">
+      {error && <ShowAlert error={error} />}
       <h5
-        className="p-1 text-center absolute top-0 right-5 cursor-pointer"
+        className="text-center absolute top-0 right-2 cursor-pointer"
         onClick={() => {
           props.setEnterOtpPopupPanel(false);
         }}
       >
-        <i className="text-3xl text-gray-200 ri-arrow-down-wide-line"></i>
+        <i className="text-3xl text-gray-300 ri-arrow-down-wide-line"></i>
       </h5>
-      <h3 className="text-xl font-semibold mt-2">
+      <h3 className="text-xl font-semibold mt-4">
         Enter Otp to Start this ride
       </h3>
-      <div className="flex items-center justify-between p-3 border-2 border-yellow-400 rounded-lg mt-2">
-        <div className="flex items-center gap-3 ">
+      <div className="flex flex-wrap items-center justify-between p-3 border-2 border-yellow-400 rounded-lg mt-2">
+        <div className="flex flex-wrap items-center gap-3 ">
           <img
             className="h-12 rounded-full object-cover w-12"
             src="https://i.pinimg.com/236x/af/26/28/af26280b0ca305be47df0b799ed1b12b.jpg"
@@ -75,8 +79,8 @@ const EnterOtpPopUp = (props) => {
           props.ride?.distance.value / 1000
         ).toFixed(2)} KM`}</h5>
       </div>
-      <div className="flex gap-2 justify-between flex-col items-center">
-        <div className="w-full mt-5">
+      <div className="flex justify-between flex-col items-center">
+        <div className="w-full mt-1">
           <div className="flex items-center gap-5 p-3 border-b-2">
             <i className="ri-map-pin-user-fill"></i>
             <div>
@@ -113,7 +117,7 @@ const EnterOtpPopUp = (props) => {
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               type="text"
-              className="bg-[#eee] px-6 py-4 font-mono text-lg rounded-lg w-full mt-3"
+              className="bg-[#eee] px-6 py-4 font-mono text-lg rounded-lg w-full"
               placeholder="Enter OTP"
             />
             <button

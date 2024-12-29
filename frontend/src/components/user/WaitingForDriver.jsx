@@ -12,13 +12,13 @@ const WaitingForDriver = (props) => {
         <i className="text-3xl text-gray-200 ri-arrow-down-wide-line"></i>
       </h5>
       <h3 className="text-2xl font-semibold mb-5">Waiting for a Driver</h3>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap gap-5 items-center justify-center xxs:justify-between">
         <img
           className="h-12"
           src="https://swyft.pl/wp-content/uploads/2023/05/how-many-people-can-a-uberx-take.jpg"
           alt=""
         />
-        <div className="text-right">
+        <div className="text-right flex flex-col items-center">
           <h2 className="text-lg font-medium capitalize">
             {props.ride?.captain?.fullname.firstname}
           </h2>

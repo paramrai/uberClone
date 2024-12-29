@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CaptainDataContext } from "../../context/CaptainContext";
+import ShowAlert from "../../components/ShowAlert";
 ("../context/CapatainContext");
 
 const Captainlogin = () => {
@@ -58,8 +59,13 @@ const Captainlogin = () => {
     }
   };
 
+  const dismissAlert = () => {
+    setError(null);
+  };
+
   return (
-    <div className="max-w-96 mx-auto">
+    <div className="relative">
+      {error && <ShowAlert error={error} dismissAlert={dismissAlert} />}
       <div className="p-7 h-screen flex flex-col justify-between">
         <div>
           <img
@@ -97,11 +103,7 @@ const Captainlogin = () => {
               type="password"
               placeholder="password"
             />
-            {error && (
-              <span className="text-red-500 bg-white inline-block w-full text-left py-1">
-                {error}
-              </span>
-            )}
+
             <button
               type="submit"
               className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base"

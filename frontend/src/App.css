@@ -1,0 +1,9 @@
+/* Combine all the styles for different browsers */
+html,
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge Legacy */
+}
+::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
