@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "name": "uber-clone",
+  "description": "A clone of Uber's web app",
+  "builds": [
+    {
+      "src": "app.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.js"
+    }
+  ]
+}
