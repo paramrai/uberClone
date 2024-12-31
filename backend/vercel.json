@@ -1,7 +1,6 @@
 {
   "version": 2,
-  "name": "uber-clone",
-  "description": "A clone of Uber's web app",
+  "name": "uber-api",
   "builds": [
     {
       "src": "app.js",
