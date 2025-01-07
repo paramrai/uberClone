@@ -9,9 +9,7 @@ import EnterOtpPopUp from "../../components/captain/EnterOtpPopUp";
 import current from "../../assets/car.png";
 import pickup from "../../assets/location.png";
 import destination from "../../assets/locationPin.png";
-import ShowAlert from "../../components/ShowAlert";
-
-// temporarily used for testing to show captain reacheda t pickup
+import InfoAlert from "../../components/captain/InfoAlert";
 
 const CaptainRiding = () => {
   const [finishRidePanel, setFinishRidePanel] = useState(false);
@@ -25,6 +23,7 @@ const CaptainRiding = () => {
   // refs
   const finishRidePanelRef = useRef(null);
   const enterOtpPopupPanelRef = useRef(null);
+  const infoRef = useRef(null);
 
   useGSAP(
     function () {
@@ -62,6 +61,14 @@ const CaptainRiding = () => {
 
   return (
     <div className="h-screen relative flex flex-col justify-end overflow-x-hidden overflow-y-auto">
+      {arrivedAtPickup && (
+        <div
+          ref={infoRef}
+          className="fixed top-[20%] left-[50%] translate-x-[-50%] w-[80%] z-50 flex items-center justify-center"
+        >
+          <InfoAlert infoRef={infoRef} />
+        </div>
+      )}
       <Link
         to="/captain-home"
         className=" h-10 w-10 z-10 bg-white flex items-center justify-center rounded-sm absolute top-[65px] right-[10px]"
@@ -83,10 +90,10 @@ const CaptainRiding = () => {
           >
             <i className="text-3xl text-gray-800 ri-arrow-up-wide-line"></i>
           </h5>
-          <div className="text-xl font-semibold hidden xxs:flex flex-col">
+          <div className="text-xl font-semibold hidden xxs:flex flex-col justify-center gap-1">
             <div className="flex items-center h-7 p-2">
               <img src={pickup} alt="pickup" className="w-7 h-7 inline-block" />
-              <span>is pickup Point</span>
+              <span className="text-sm">is pickup Point</span>
             </div>
             <div className="flex items-center h-7 p-2">
               <img
@@ -94,7 +101,7 @@ const CaptainRiding = () => {
                 alt="pickup"
                 className="w-7 h-7 inline-block"
               />
-              <span>is destination Point</span>
+              <span className="text-sm">is destination Point</span>
             </div>
           </div>
           <button className=" bg-green-600 text-white font-semibold p-3 px-10 rounded-lg ">

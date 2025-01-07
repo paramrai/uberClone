@@ -31,6 +31,7 @@ const Home = () => {
   const [ride, setRide] = useState(null);
   const [error, setError] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // refs
   const panelRef = useRef(null);
@@ -158,6 +159,7 @@ const Home = () => {
       return;
     }
 
+    setLoading(true);
     // fetch vehicle options
     try {
       const token = localStorage.getItem("token");
@@ -173,11 +175,14 @@ const Home = () => {
           },
         }
       );
+
       if (response.status === 200) {
         setFare(response.data);
         setVehiclePanel(true);
+        setLoading(false);
       }
     } catch (error) {
+      setLoading(false);
       if (
         error.response.data.message ===
         "Cannot read properties of undefined (reading 'value')"
@@ -375,9 +380,9 @@ const Home = () => {
           <div className="bg-white pt-2">
             <button
               onClick={findTrip}
-              className="bg-black text-white px-4 py-2 rounded-lg mt-3 w-full"
+              className="relative bg-black text-white px-4 py-2 rounded-sm mt-3 w-full"
             >
-              Find Trip
+              {loading ? "Loading..." : "Find Trip"}
             </button>
           </div>
         </div>

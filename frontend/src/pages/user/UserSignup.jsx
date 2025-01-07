@@ -10,6 +10,7 @@ const UserSignup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const { user, setUser } = useContext(UserDataContext);
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const UserSignup = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     const newUser = {
       fullname: {
         firstname,
@@ -43,15 +46,19 @@ const UserSignup = () => {
         setUser(user);
         localStorage.setItem("token", token);
         navigate(`/home`);
+        setLoading(false);
       }
 
       setEmail("");
       setFirstname("");
       setLastname("");
       setPassword("");
+      setLoading(false);
     } catch (error) {
+      console.log(error);
       // handle the error and display it to the user
-      setError(error.response.data.errors[0].msg);
+      setError(error.response.data.msg);
+      setLoading(false);
     }
   };
 
@@ -120,7 +127,7 @@ const UserSignup = () => {
               />
 
               <button className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base">
-                Create account
+                {loading ? "Loading..." : "Create account"}
               </button>
             </form>
             <p className="text-center">

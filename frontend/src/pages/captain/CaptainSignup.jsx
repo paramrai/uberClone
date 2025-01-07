@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CaptainDataContext } from "../../context/CaptainContext";
+import ShowAlert from "../../components/ShowAlert";
 
 const CaptainSignup = () => {
   const { captain, setCaptain } = useContext(CaptainDataContext);
@@ -18,16 +19,19 @@ const CaptainSignup = () => {
   const [vehicleCapacity, setVehicleCapacity] = useState("");
   const [vehicleType, setVehicleType] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Clear error after 10 seconds
-    setTimeout(() => {
-      setError(null);
-    }, 10000);
-  }, []);
+    if (error) {
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
+    }
+  }, [error]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const captainData = {
       fullname: {
         firstname: firstName,
@@ -54,15 +58,22 @@ const CaptainSignup = () => {
         setCaptain(data.captain);
         localStorage.setItem("captain-token", data.token);
         navigate("/captain-home");
+        setLoading(false);
       }
     } catch (error) {
       // update the error message
-      setError(error.response.data.errors[0].msg);
+      console.log(error);
+      setError(error.response.data.message);
+      setLoading(false);
     }
   };
+
+  const dismissAlert = () => setError(null);
+
   return (
-    <div className="">
+    <div>
       <div className="py-5 px-5 h-screen flex flex-col justify-between">
+        {error && <ShowAlert error={error} dismissAlert={dismissAlert} />}
         <div>
           <img
             className="w-20 mb-3"
@@ -178,13 +189,9 @@ const CaptainSignup = () => {
                 <option value="moto">Moto</option>
               </select>
             </div>
-            {error && (
-              <span className="text-red-500 bg-white inline-block w-full text-left py-1">
-                {error}
-              </span>
-            )}
+
             <button className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base">
-              Create Captain Account
+              {loading ? "Loading..." : "Create Captain Account"}
             </button>
           </form>
           <p className="text-center">

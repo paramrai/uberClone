@@ -10,6 +10,7 @@ const Captainlogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { captain, setCaptain } = useContext(CaptainDataContext);
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const Captainlogin = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     const captain = {
       email: email,
       password,
@@ -41,8 +42,10 @@ const Captainlogin = () => {
         localStorage.setItem("captain-token", data.token);
         setCaptain(data.captain);
         navigate("/captain-home");
+        setLoading(false);
       } else {
         setError("Login failed: Unexpected response status.");
+        setLoading(false);
       }
     } catch (error) {
       // Handle errors correctly
@@ -56,6 +59,10 @@ const Captainlogin = () => {
       } else {
         setError("An unexpected error occurred: " + error.message);
       }
+
+      setLoading(false);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,7 +115,7 @@ const Captainlogin = () => {
               type="submit"
               className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base"
             >
-              Login
+              {loading ? "Loading..." : "Login"}
             </button>
           </form>
           <p className="text-center">

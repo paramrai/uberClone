@@ -10,9 +10,11 @@ const UserLogin = () => {
   const { user, setUser } = useContext(UserDataContext);
   const navigate = useNavigate();
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await axios.post(
@@ -25,6 +27,7 @@ const UserLogin = () => {
         localStorage.setItem("token", token);
         navigate("/home");
         setUser(user);
+        setLoading(false);
       } else {
         console.error("Error:", data.message);
       }
@@ -34,6 +37,7 @@ const UserLogin = () => {
       } else {
         setError("Something went wrong ! Check Network !!!");
       }
+      setLoading(false);
     }
   };
 
@@ -78,7 +82,7 @@ const UserLogin = () => {
             />
 
             <button className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base">
-              Login
+              {loading ? "Loading..." : "Login"}
             </button>
           </form>
           <p className="text-center">
