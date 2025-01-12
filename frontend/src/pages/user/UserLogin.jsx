@@ -1,8 +1,9 @@
 import axios from "axios";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserDataContext } from "../../context/UserContext";
 import ShowAlert from "../../components/ShowAlert";
+import { updateHeight } from "./Home";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
@@ -11,6 +12,22 @@ const UserLogin = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const screenRef = useRef(null);
+
+  useEffect(() => {
+    updateHeight(screenRef);
+    // Add event listener to update height on window resize
+    window.addEventListener("resize", () => {
+      updateHeight(screenRef);
+    });
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", () => {
+        updateHeight(screenRef);
+      });
+    };
+  }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -49,7 +66,10 @@ const UserLogin = () => {
     <div className="relative">
       {error && <ShowAlert error={error} dismissAlert={dismissAlert} />}
 
-      <div className="p-7 h-screen flex flex-col justify-between">
+      <div
+        ref={screenRef}
+        className="p-7 h-screen flex flex-col justify-between"
+      >
         <div>
           <img
             className="w-16 mb-10"

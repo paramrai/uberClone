@@ -10,6 +10,7 @@ import current from "../../assets/car.png";
 import pickup from "../../assets/location.png";
 import destination from "../../assets/locationPin.png";
 import InfoAlert from "../../components/captain/InfoAlert";
+import { updateHeight } from "../user/Home";
 
 const CaptainRiding = () => {
   const [finishRidePanel, setFinishRidePanel] = useState(false);
@@ -24,6 +25,29 @@ const CaptainRiding = () => {
   const finishRidePanelRef = useRef(null);
   const enterOtpPopupPanelRef = useRef(null);
   const infoRef = useRef(null);
+  const screenRef = useRef(null);
+
+  useEffect(() => {
+    updateHeight(finishRidePanelRef);
+    updateHeight(enterOtpPopupPanelRef);
+    updateHeight(screenRef);
+
+    // Add event listener to update height on window resize
+    window.addEventListener("resize", () => {
+      updateHeight(finishRidePanelRef);
+      updateHeight(enterOtpPopupPanelRef);
+      updateHeight(screenRef);
+    });
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", () => {
+        updateHeight(finishRidePanelRef);
+        updateHeight(enterOtpPopupPanelRef);
+        updateHeight(screenRef);
+      });
+    };
+  }, []);
 
   useGSAP(
     function () {
@@ -60,7 +84,10 @@ const CaptainRiding = () => {
   );
 
   return (
-    <div className="h-screen relative flex flex-col justify-end overflow-x-hidden overflow-y-auto">
+    <div
+      ref={screenRef}
+      className="h-screen relative flex flex-col justify-end overflow-x-hidden overflow-y-auto"
+    >
       {arrivedAtPickup && (
         <div
           ref={infoRef}

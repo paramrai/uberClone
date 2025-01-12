@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CaptainDataContext } from "../../context/CaptainContext";
 import ShowAlert from "../../components/ShowAlert";
+import { updateHeight } from "../user/Home";
 ("../context/CapatainContext");
 
 const Captainlogin = () => {
@@ -14,6 +15,23 @@ const Captainlogin = () => {
 
   const { captain, setCaptain } = useContext(CaptainDataContext);
   const navigate = useNavigate();
+  const captainLoginRef = useRef(null);
+
+  useEffect(() => {
+    updateHeight(captainLoginRef);
+
+    // Add event listener to update height on window resize
+    window.addEventListener("resize", () => {
+      updateHeight(captainLoginRef);
+    });
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", () => {
+        updateHeight(captainLoginRef);
+      });
+    };
+  }, []);
 
   useEffect(() => {
     // clear the error afer 7 seconds
@@ -71,9 +89,9 @@ const Captainlogin = () => {
   };
 
   return (
-    <div className="relative">
+    <div ref={captainLoginRef} className="relative h-screen">
       {error && <ShowAlert error={error} dismissAlert={dismissAlert} />}
-      <div className="p-7 h-screen flex flex-col justify-between">
+      <div className="p-7 flex flex-col justify-between">
         <div>
           <img
             className="w-20 mb-3"

@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserDataContext } from "../../context/UserContext";
 import ShowAlert from "../../components/ShowAlert";
+import { updateHeight } from "./Home";
 
 const UserSignup = () => {
   const [firstname, setFirstname] = useState("");
@@ -13,13 +14,27 @@ const UserSignup = () => {
   const [loading, setLoading] = useState(false);
 
   const { user, setUser } = useContext(UserDataContext);
+  const screenRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (error) {
-      // false the error after 7 seconds
       setTimeout(() => setError(null), 10000);
     }
+
+    updateHeight(screenRef);
+
+    // Add event listener to update height on window resize
+    window.addEventListener("resize", () => {
+      updateHeight(screenRef);
+    });
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", () => {
+        updateHeight(screenRef);
+      });
+    };
   });
 
   const submitHandler = async (e) => {
@@ -66,7 +81,7 @@ const UserSignup = () => {
 
   return (
     <>
-      <div className="relative">
+      <div ref={screenRef} className="relative">
         {error && <ShowAlert error={error} dismissAlert={dismissAlert} />}
         <div className="p-7 h-screen flex flex-col justify-between">
           <div>

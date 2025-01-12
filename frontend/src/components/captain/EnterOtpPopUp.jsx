@@ -49,18 +49,19 @@ const EnterOtpPopUp = (props) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex gap-4 flex-col">
       {error && <ShowAlert error={error} />}
-      <h5
-        className="text-center absolute top-0 right-2 cursor-pointer"
-        onClick={() => {
-          props.setEnterOtpPopupPanel(false);
-        }}
-      >
-        <i className="text-3xl text-gray-300 ri-arrow-down-wide-line"></i>
-      </h5>
-      <h3 className="text-xl font-semibold mt-4">
+
+      <h3 className="text-xl font-semibold mt-4 flex justify-between items-center">
         Enter Otp to Start this ride
+        <i
+          className="text-center cursor-pointer"
+          onClick={() => {
+            props.setEnterOtpPopupPanel(false);
+          }}
+        >
+          <i className="text-3xl text-gray-300 ri-arrow-down-wide-line"></i>
+        </i>
       </h3>
       <div className="flex flex-wrap items-center justify-between p-3 border-2 border-yellow-400 rounded-lg mt-2">
         <div className="flex flex-wrap items-center gap-3 ">

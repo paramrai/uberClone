@@ -1,9 +1,10 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CaptainDataContext } from "../../context/CaptainContext";
 import ShowAlert from "../../components/ShowAlert";
+import { updateHeight } from "../user/Home";
 
 const CaptainSignup = () => {
   const { captain, setCaptain } = useContext(CaptainDataContext);
@@ -20,6 +21,7 @@ const CaptainSignup = () => {
   const [vehicleType, setVehicleType] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const screenRef = useRef(null);
 
   useEffect(() => {
     if (error) {
@@ -27,6 +29,20 @@ const CaptainSignup = () => {
         setError(null);
       }, 5000);
     }
+
+    updateHeight(screenRef);
+
+    // Add event listener to update height on window resize
+    window.addEventListener("resize", () => {
+      updateHeight(screenRef);
+    });
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", () => {
+        updateHeight(screenRef);
+      });
+    };
   }, [error]);
 
   const submitHandler = async (e) => {
@@ -71,8 +87,8 @@ const CaptainSignup = () => {
   const dismissAlert = () => setError(null);
 
   return (
-    <div>
-      <div className="py-5 px-5 h-screen flex flex-col justify-between">
+    <div ref={screenRef} className="h-screen w-full">
+      <div className="py-5 px-5 flex flex-col justify-between">
         {error && <ShowAlert error={error} dismissAlert={dismissAlert} />}
         <div>
           <img

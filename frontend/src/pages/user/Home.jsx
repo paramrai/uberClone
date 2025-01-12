@@ -13,6 +13,13 @@ import { useNavigate } from "react-router-dom";
 import LiveTracking from "../../components/LiveTracking";
 import ShowAlert from "../../components/ShowAlert";
 
+// for mobile ui
+export const updateHeight = (div) => {
+  if (div.current) {
+    div.current.style.height = `${window.innerHeight}px`;
+  }
+};
+
 const Home = () => {
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
@@ -41,14 +48,43 @@ const Home = () => {
   const waitingForDriverRef = useRef(null);
   const vehicleFoundRef = useRef(null);
   const liveTrackingRef = useRef(null);
+  const homeRef = useRef(null);
+
+  const { user, updateUser } = useContext(UserDataContext);
+  const { socket } = useContext(SocketContext);
+  const navigate = useNavigate();
 
   const submitHandler = (e) => {
     e.preventDefault();
   };
 
-  const { user, updateUser } = useContext(UserDataContext);
-  const { socket } = useContext(SocketContext);
-  const navigate = useNavigate();
+  useEffect(() => {
+    updateHeight(vehiclePanelRef);
+    updateHeight(vehicleFoundRef);
+    updateHeight(confirmRidePanelRef);
+    updateHeight(waitingForDriverRef);
+    updateHeight(homeRef);
+
+    // Add event listener to update height on window resize
+    window.addEventListener("resize", () => {
+      updateHeight(vehiclePanelRef);
+      updateHeight(vehicleFoundRef);
+      updateHeight(confirmRidePanelRef);
+      updateHeight(waitingForDriverRef);
+      updateHeight(homeRef);
+    });
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", () => {
+        updateHeight(vehiclePanelRef);
+        updateHeight(vehicleFoundRef);
+        updateHeight(confirmRidePanelRef);
+        updateHeight(waitingForDriverRef);
+        updateHeight(homeRef);
+      });
+    };
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -328,7 +364,7 @@ const Home = () => {
   );
 
   return (
-    <div className="relative w-screen h-screen overflow-x-hidden">
+    <div ref={homeRef} className="relative w-screen overflow-hidden">
       {showAlert && <ShowAlert error={error} dismissAlert={dismissAlert} />}
       <div className="flex flex-col justify-end items-center h-screen absolute top-0 w-full">
         <div className="h-[80%] w-full" ref={liveTrackingRef}>

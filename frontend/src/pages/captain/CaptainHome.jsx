@@ -8,6 +8,7 @@ import axios from "axios";
 import { CaptainDataContext } from "../../context/CaptainContext";
 import LiveTracking from "../../components/LiveTracking";
 import CaptainDetails from "../../components/captain/CaptainDetails";
+import { updateHeight } from "../user/Home";
 
 const CaptainHome = () => {
   const [ridePopupPanel, setRidePopupPanel] = useState(false);
@@ -17,7 +18,30 @@ const CaptainHome = () => {
   const confirmRidePopupPanelRef = useRef(null);
   const [ride, setRide] = useState(null);
   const navigate = useNavigate();
-  const screenRef = useRef(null);
+  const captainHomeRef = useRef(null);
+
+  // for ui_fix mobile
+  useEffect(() => {
+    updateHeight(ridePopupPanelRef);
+    updateHeight(confirmRidePopupPanelRef);
+    updateHeight(captainHomeRef);
+
+    // Add event listener to update height on window resize
+    window.addEventListener("resize", () => {
+      updateHeight(ridePopupPanelRef);
+      updateHeight(confirmRidePopupPanelRef);
+      updateHeight(captainHomeRef);
+    });
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", () => {
+        updateHeight(ridePopupPanelRef);
+        updateHeight(confirmRidePopupPanelRef);
+        updateHeight(captainHomeRef);
+      });
+    };
+  }, []);
 
   useGSAP(
     function () {
@@ -147,11 +171,7 @@ const CaptainHome = () => {
   }
 
   return (
-    <div
-      style={{
-        height: "100vh",
-      }}
-    >
+    <div ref={captainHomeRef} className="h-screen w-full">
       <div className="fixed p-6 top-0 flex items-center justify-between w-screen">
         <img
           className="w-16"
